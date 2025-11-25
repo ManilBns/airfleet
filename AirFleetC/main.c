@@ -1,6 +1,7 @@
 #include <stdio.h>
-#include "list.h"
 
+#include "algorithms.h"
+#include "list.h"
 int main() {
     Node* head = NULL;
 
@@ -21,6 +22,18 @@ int main() {
     head = supprimerAvion(head, 1);
     printf("\nAprès suppression ID=1 :\n");
     afficherListe(head);
+    printf("\n=== Tri par crashs ===\n");
+    head = trierParCrashs(head);
+    afficherListe(head);
 
+    printf("\n=== Tri par autonomie ===\n");
+    head = trierParAutonomie(head);
+    afficherListe(head);
+
+    printf("\n=== Statistiques ===\n");
+    printf("Moyenne crashs : %.2f\n", moyenneCrashs(head));
+    printf("Moyenne autonomie : %.2f\n", moyenneAutonomie(head));
+    printf("Max crashs : %d\n", maxCrashs(head));
+    printf("Min crashs : %d\n", minCrashs(head));
     return 0;
 }
