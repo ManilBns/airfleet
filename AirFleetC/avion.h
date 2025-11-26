@@ -5,8 +5,8 @@
 
 typedef struct {
     int id;
-    char fabricant[MAX_STRING];
-    char modele[MAX_STRING];
+    char fabricant[50];
+    char modele[50];
     int capacite;
     int autonomie;
     int crashs;
