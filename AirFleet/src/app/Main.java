@@ -2,14 +2,17 @@ package app;
 
 import java.util.List;
 import java.util.Scanner;
+
 import model.Avion;
 import service.AvionService;
+import nativeLib.NativeLib;
 
 public class Main {
 
     public static void main(String[] args) {
-
+		System.out.println(System.getProperty("java.library.path"));
         AvionService service = new AvionService();
+        NativeLib lib = new NativeLib();
         Scanner sc = new Scanner(System.in);
 
         int choix;
@@ -21,6 +24,7 @@ public class Main {
             System.out.println("3 — Rechercher par fabricant");
             System.out.println("4 — Ajouter un avion");
             System.out.println("5 — Supprimer un avion");
+            System.out.println("6 — Statistiques avancées (C)");
             System.out.println("0 — Quitter");
             System.out.print("Votre choix : ");
 
@@ -28,42 +32,49 @@ public class Main {
 
             switch (choix) {
 
-                // ----------------------------------------------------
-                // 1 — Afficher
-                // ----------------------------------------------------
                 case 1:
                     List<Avion> all = service.getAll();
                     if (!all.isEmpty()) all.forEach(System.out::println);
                     else System.out.println("Aucun avion trouvé.");
                     break;
 
-                // ----------------------------------------------------
-                // 2 — Recherche par modèle
-                // ----------------------------------------------------
                 case 2:
                     System.out.print("Modèle à rechercher : ");
                     String modele = sc.nextLine();
                     Avion avion = service.searchByModel(modele);
 
-                    if (avion != null) System.out.println("\n" + avion);
-                    else System.out.println("Aucun avion trouvé avec ce modèle.");
+                    if (avion != null) {
+                        System.out.println("\n" + avion);
+
+                        // Statistiques via JNI
+                        Avion[] arr = { avion };
+                        System.out.println("Crashs de cet avion : " + lib.moyenneCrashs(arr));
+                        System.out.println("Autonomie : " + lib.moyenneAutonomie(arr));
+                    } else {
+                        System.out.println("Aucun avion trouvé avec ce modèle.");
+                    }
                     break;
 
-                // ----------------------------------------------------
-                // 3 — Recherche par fabricant
-                // ----------------------------------------------------
                 case 3:
                     System.out.print("Fabricant (Airbus/Boeing) : ");
                     String fabricant = sc.nextLine();
                     List<Avion> fabList = service.searchByFabricant(fabricant);
 
-                    if (!fabList.isEmpty()) fabList.forEach(System.out::println);
-                    else System.out.println("Aucun avion trouvé pour ce fabricant.");
+                    if (!fabList.isEmpty()) {
+                        fabList.forEach(System.out::println);
+
+                        Avion[] arr = fabList.toArray(new Avion[0]);
+                        System.out.println("Moyenne crashs : " + lib.moyenneCrashs(arr));
+                        System.out.println("Moyenne autonomie : " + lib.moyenneAutonomie(arr));
+
+                        // Max crash
+                        Avion[] sortedCrash = lib.trierParCrashs(arr);
+                        System.out.println("Avion avec le max crash : " + sortedCrash[sortedCrash.length - 1]);
+                    } else {
+                        System.out.println("Aucun avion trouvé pour ce fabricant.");
+                    }
                     break;
 
-                // ----------------------------------------------------
-                // 4 — Ajouter un avion
-                // ----------------------------------------------------
                 case 4:
                     System.out.print("Fabricant : ");
                     String fab = sc.nextLine();
@@ -88,9 +99,6 @@ public class Main {
                     System.out.println("Avion ajouté avec succès !");
                     break;
 
-                // ----------------------------------------------------
-                // 5 — Supprimer
-                // ----------------------------------------------------
                 case 5:
                     System.out.print("ID de l’avion à supprimer : ");
                     int id = Integer.parseInt(sc.nextLine());
@@ -100,9 +108,22 @@ public class Main {
                     else System.out.println("Échec de la suppression (ID introuvable).");
                     break;
 
-                // ----------------------------------------------------
-                // 0 — Quitter
-                // ----------------------------------------------------
+                case 6:
+                    System.out.println("\n--- Statistiques globales ---");
+                    List<Avion> allAvions = service.getAll();
+                    if (!allAvions.isEmpty()) {
+                        Avion[] arr = allAvions.toArray(new Avion[0]);
+                        System.out.println("Moyenne crashs : " + lib.moyenneCrashs(arr));
+                        System.out.println("Moyenne autonomie : " + lib.moyenneAutonomie(arr));
+
+                        // Max crash
+                        Avion[] sortedCrash = lib.trierParCrashs(arr);
+                        System.out.println("Avion avec le max crash : " + sortedCrash[sortedCrash.length - 1]);
+                    } else {
+                        System.out.println("Aucun avion dans la base.");
+                    }
+                    break;
+
                 case 0:
                     System.out.println("Fermeture du programme...");
                     break;
