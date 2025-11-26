@@ -11,7 +11,7 @@ typedef struct {
     int capacite;
     int autonomie;
     int crashs;
-    int annee_service;
+    int anneeService;
 } Avion;
 
 // Fonction utilitaire : copier les champs depuis jobject Java vers struct Avion C
@@ -45,8 +45,8 @@ Avion getAvion(JNIEnv *env, jobject jAvion) {
     fid = (*env)->GetFieldID(env, cls, "crashs", "I");
     a.crashs = (*env)->GetIntField(env, jAvion, fid);
 
-    fid = (*env)->GetFieldID(env, cls, "annee_service", "I");
-    a.annee_service = (*env)->GetIntField(env, jAvion, fid);
+    fid = (*env)->GetFieldID(env, cls, "anneeService", "I");
+    a.anneeService = (*env)->GetIntField(env, jAvion, fid);
 
     return a;
 }
@@ -56,7 +56,7 @@ jobject createAvion(JNIEnv *env, jclass clsAvion, Avion a) {
     jmethodID constructor = (*env)->GetMethodID(env, clsAvion, "<init>", "(ILjava/lang/String;Ljava/lang/String;IIII)V");
     jstring fab = (*env)->NewStringUTF(env, a.fabricant);
     jstring mod = (*env)->NewStringUTF(env, a.modele);
-    return (*env)->NewObject(env, clsAvion, constructor, a.id, fab, mod, a.capacite, a.autonomie, a.crashs, a.annee_service);
+    return (*env)->NewObject(env, clsAvion, constructor, a.id, fab, mod, a.capacite, a.autonomie, a.crashs, a.anneeService);
 }
 
 // ----------------- TRI PAR CRASHS -----------------
