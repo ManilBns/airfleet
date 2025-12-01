@@ -13,66 +13,7 @@ import nativeLib.NativeLib;
 public class Main {
 
     // Méthode pour choisir un constructeur parmi ceux existants
-    public static String choisirConstructeur(AvionService avionService, Scanner sc) {
-        List<String> constructeurs = avionService.getAllConstructeurs();
-        if (constructeurs.isEmpty()) {
-            System.out.println("Aucun constructeur disponible.");
-            return null;
-        }
-
-        System.out.println("Sélectionnez un constructeur :");
-        for (int i = 0; i < constructeurs.size(); i++) {
-            System.out.println((i + 1) + ". " + constructeurs.get(i));
-        }
-        System.out.println("0. Retour au menu principal");
-
-        int choix = -1;
-        do {
-            System.out.print("Votre choix (numéro) : ");
-            String line = sc.nextLine().trim();
-            try {
-                choix = Integer.parseInt(line);
-            } catch (NumberFormatException e) {
-                choix = -1;
-            }
-
-            if (choix == 0) return null; // retourne au menu principal
-
-        } while (choix < 1 || choix > constructeurs.size());
-
-        return constructeurs.get(choix - 1);
-    }
-
-    // Méthode pour choisir un modèle parmi ceux existants
-    public static String choisirModele(AvionService avionService, Scanner sc) {
-        List<String> modeles = avionService.getAllModele();
-        if (modeles.isEmpty()) {
-            System.out.println("Aucun modèle disponible.");
-            return null;
-        }
-
-        System.out.println("Sélectionnez un modèle :");
-        for (int i = 0; i < modeles.size(); i++) {
-            System.out.println((i + 1) + ". " + modeles.get(i));
-        }
-        System.out.println("0. Retour au menu principal");
-
-        int choix = -1;
-        do {
-            System.out.print("Votre choix (numéro) : ");
-            String line = sc.nextLine().trim();
-            try {
-                choix = Integer.parseInt(line);
-            } catch (NumberFormatException e) {
-                choix = -1;
-            }
-
-            if (choix == 0) return null; // retourne au menu principal
-
-        } while (choix < 1 || choix > modeles.size());
-
-        return modeles.get(choix - 1);
-    }
+   
 
     public static void main(String[] args) {
 
@@ -109,7 +50,7 @@ public class Main {
                     break;
 
                 case 2: // Recherche par modèle
-                    String modele = choisirModele(avionService, sc);
+                    String modele = AvionService.choisirModele(avionService, sc);
                     if (modele != null) {
                         Avion avion = avionService.searchByModel(modele);
                         if (avion != null) System.out.println(avion);
@@ -118,7 +59,7 @@ public class Main {
                     break;
 
                 case 3: // Recherche par constructeur
-                    String fabricant = choisirConstructeur(avionService, sc);
+                    String fabricant = AvionService.choisirConstructeur(avionService, sc);
                     if (fabricant != null) {
                         List<Avion> fabList = avionService.searchByFabricant(fabricant);
                         if (!fabList.isEmpty()) fabList.forEach(System.out::println);
@@ -198,7 +139,7 @@ public class Main {
 
                         switch (sousChoix) {
                             case 1: // Résumé constructeur
-                                String fabStat = choisirConstructeur(avionService, sc);
+                                String fabStat = AvionService.choisirConstructeur(avionService, sc);
                                 if (fabStat != null) {
                                     List<Avion> avionsFilter = avionService.searchByFabricant(fabStat);
                                     if (!avionsFilter.isEmpty()) {
@@ -231,7 +172,7 @@ public class Main {
                                 break;
 
                             case 2: // Rechercher crashs par modèle
-                                String modelCrash = choisirModele(avionService, sc);
+                                String modelCrash = AvionService.choisirModele(avionService, sc);
                                 if (modelCrash != null) {
                                     List<Crash> crashess = crashService.getByModele(modelCrash);
                                     if (!crashess.isEmpty()) {
@@ -243,7 +184,7 @@ public class Main {
                                 break;
 
                             case 3: // Rechercher crashs par constructeur
-                                String fabCrash = choisirConstructeur(avionService, sc);
+                                String fabCrash = AvionService.choisirConstructeur(avionService, sc);
                                 if (fabCrash != null) {
                                     List<Crash> crashes = crashService.getByFabricant(fabCrash);
                                     if (!crashes.isEmpty()) {
@@ -272,7 +213,7 @@ public class Main {
                                     String avionIdStr = sc.nextLine().trim();
                                     if (avionIdStr.equalsIgnoreCase("menu")) break;
                                     int avionId = Integer.parseInt(avionIdStr);
-                                    String crashModele = choisirModele(avionService, sc);
+                                    String crashModele = AvionService.choisirModele(avionService, sc);
                                     if (crashModele == null) break;
                                     System.out.print("Date du crash (YYYY-MM-DD) : ");
                                     String dateStr = sc.nextLine().trim();

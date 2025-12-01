@@ -7,6 +7,7 @@ import model.Crash;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 public class AvionService {
     public List<Avion> getAll() {
@@ -175,6 +176,67 @@ public class AvionService {
             e.printStackTrace();
         }
         return modele;
+    }
+    
+    public static String choisirConstructeur(AvionService avionService, Scanner sc) {
+        List<String> constructeurs = avionService.getAllConstructeurs();
+        if (constructeurs.isEmpty()) {
+            System.out.println("Aucun constructeur disponible.");
+            return null;
+        }
+
+        System.out.println("Sélectionnez un constructeur :");
+        for (int i = 0; i < constructeurs.size(); i++) {
+            System.out.println((i + 1) + ". " + constructeurs.get(i));
+        }
+        System.out.println("0. Retour au menu principal");
+
+        int choix = -1;
+        do {
+            System.out.print("Votre choix (numéro) : ");
+            String line = sc.nextLine().trim();
+            try {
+                choix = Integer.parseInt(line);
+            } catch (NumberFormatException e) {
+                choix = -1;
+            }
+
+            if (choix == 0) return null; // retourne au menu principal
+
+        } while (choix < 1 || choix > constructeurs.size());
+
+        return constructeurs.get(choix - 1);
+    }
+
+    // Méthode pour choisir un modèle parmi ceux existants
+    public static String choisirModele(AvionService avionService, Scanner sc) {
+        List<String> modeles = avionService.getAllModele();
+        if (modeles.isEmpty()) {
+            System.out.println("Aucun modèle disponible.");
+            return null;
+        }
+
+        System.out.println("Sélectionnez un modèle :");
+        for (int i = 0; i < modeles.size(); i++) {
+            System.out.println((i + 1) + ". " + modeles.get(i));
+        }
+        System.out.println("0. Retour au menu principal");
+
+        int choix = -1;
+        do {
+            System.out.print("Votre choix (numéro) : ");
+            String line = sc.nextLine().trim();
+            try {
+                choix = Integer.parseInt(line);
+            } catch (NumberFormatException e) {
+                choix = -1;
+            }
+
+            if (choix == 0) return null; // retourne au menu principal
+
+        } while (choix < 1 || choix > modeles.size());
+
+        return modeles.get(choix - 1);
     }
 }
 
