@@ -2,6 +2,8 @@ package service;
 
 import database.Database;
 import model.Avion;
+import model.Crash;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -174,7 +176,6 @@ public class AvionService {
         }
         return modele;
     }
-
 }
 
 
