@@ -12,6 +12,33 @@ import nativeLib.NativeLib;
 
 public class Main {
 
+    // Méthode pour choisir un constructeur parmi ceux existants
+    public static String choisirConstructeur(AvionService avionService, Scanner sc) {
+        List<String> constructeurs = avionService.getAllConstructeurs();
+        if (constructeurs.isEmpty()) {
+            System.out.println("Aucun constructeur disponible.");
+            return null;
+        }
+
+        System.out.println("Sélectionnez un constructeur :");
+        for (int i = 0; i < constructeurs.size(); i++) {
+            System.out.println((i + 1) + " — " + constructeurs.get(i));
+        }
+
+        int choix = -1;
+        do {
+            System.out.print("Votre choix (numéro) : ");
+            String line = sc.nextLine().trim();
+            try {
+                choix = Integer.parseInt(line);
+            } catch (NumberFormatException e) {
+                choix = -1;
+            }
+        } while (choix < 1 || choix > constructeurs.size());
+
+        return constructeurs.get(choix - 1);
+    }
+
     public static void main(String[] args) {
 
         AvionService avionService = new AvionService();
@@ -55,11 +82,12 @@ public class Main {
                     break;
 
                 case 3: // Recherche par fabricant
-                    System.out.print("Fabricant (Airbus/Boeing) : ");
-                    String fabricant = sc.nextLine().trim();
-                    List<Avion> fabList = avionService.searchByFabricant(fabricant);
-                    if (!fabList.isEmpty()) fabList.forEach(System.out::println);
-                    else System.out.println("Aucun avion trouvé pour ce fabricant.");
+                    String fabricant = choisirConstructeur(avionService, sc);
+                    if (fabricant != null) {
+                        List<Avion> fabList = avionService.searchByFabricant(fabricant);
+                        if (!fabList.isEmpty()) fabList.forEach(System.out::println);
+                        else System.out.println("Aucun avion trouvé pour ce fabricant.");
+                    }
                     break;
 
                 case 4: // Ajouter un avion
@@ -107,61 +135,73 @@ public class Main {
                         }
 
                         switch (sousChoix) {
-
                             case 1: // Résumé constructeur
-                                System.out.print("Entrez le constructeur : ");
-                                String fabStat = sc.nextLine().trim();
-                                List<Avion> avionsFilter = avionService.searchByFabricant(fabStat);
-                                
-                                if (!avionsFilter.isEmpty()) {
-                                    Avion[] tabFilter = avionsFilter.toArray(new Avion[0]);
-                                    System.out.println("Moyenne autonomie : " + nativeLib.moyenneAutonomie(tabFilter));
-                                    System.out.println("Moyenne de crash : " + nativeLib.moyenneCrashs(tabFilter));
+                                String fabStat = choisirConstructeur(avionService, sc);
+                                if (fabStat != null) {
+                                    List<Avion> avionsFilter = avionService.searchByFabricant(fabStat);
+                                    if (!avionsFilter.isEmpty()) {
+                                        Avion[] tabFilter = avionsFilter.toArray(new Avion[0]);
+                                        System.out.println("Moyenne autonomie : " + nativeLib.moyenneAutonomie(tabFilter));
+                                        System.out.println("Moyenne de crash : " + nativeLib.moyenneCrashs(tabFilter));
 
-                                    int totalCrashs = crashService.countByConstructeur(fabStat);
-                                    int totalMorts = crashService.totalMortsParFabricant(fabStat);
-                                    System.out.println("Nombre total de crashs : " + totalCrashs);
-                                    System.out.println("Nombre total de morts : " + totalMorts);
+                                        int totalCrashs = crashService.countByConstructeur(fabStat);
+                                        int totalMorts = crashService.totalMortsParFabricant(fabStat);
+                                        System.out.println("Nombre total de crashs : " + totalCrashs);
+                                        System.out.println("Nombre total de morts : " + totalMorts);
 
-                                    Avion[] topFiabilite = nativeLib.trierParCrashs(tabFilter);
-                                    System.out.println("\nTop 3 avions les plus fiables :");
-                                    for (int i = 0; i < Math.min(3, topFiabilite.length); i++)
-                                        System.out.println((i + 1) + " — " + topFiabilite[i] +
-                                                " (Crashs : " + crashService.countByAvion(topFiabilite[i].getId()) + ")");
+                                        Avion[] topFiabilite = nativeLib.trierParCrashs(tabFilter);
+                                        System.out.println("\nTop 3 avions les plus fiables :");
+                                        for (int i = 0; i < Math.min(3, topFiabilite.length); i++)
+                                            System.out.println((i + 1) + " — " + topFiabilite[i] +
+                                                    " (Crashs : " + crashService.countByAvion(topFiabilite[i].getId()) + ")");
 
-                                    Avion[] topAutonomie = nativeLib.trierParAutonomie(tabFilter);
-                                    System.out.println("\nTop 3 avions les plus autonomes :");
-                                    for (int i = topAutonomie.length - 1; i >= Math.max(0, topAutonomie.length - 3); i--)
-                                        System.out.println((topAutonomie.length - i) + " — " + topAutonomie[i]);
+                                        Avion[] topAutonomie = nativeLib.trierParAutonomie(tabFilter);
+                                        System.out.println("\nTop 3 avions les plus autonomes :");
+                                        for (int i = topAutonomie.length - 1; i >= Math.max(0, topAutonomie.length - 3); i--)
+                                            System.out.println((topAutonomie.length - i) + " — " + topAutonomie[i]);
 
-                                    Avion pireAvion = topFiabilite[topFiabilite.length - 1];
-                                    System.out.println("\nPire avion en termes de sécurité :");
-                                    System.out.println("Modèle : " + pireAvion.getModele() +
-                                            ", Nombre de crashs : " + crashService.countByAvion(pireAvion.getId()));
-
-                                } else System.out.println("Aucun avion trouvé pour ce constructeur.");
+                                        Avion pireAvion = topFiabilite[topFiabilite.length - 1];
+                                        System.out.println("\nPire avion en termes de sécurité :");
+                                        System.out.println("Modèle : " + pireAvion.getModele() +
+                                                ", Nombre de crashs : " + crashService.countByAvion(pireAvion.getId()));
+                                    } else System.out.println("Aucun avion trouvé pour ce constructeur.");
+                                }
                                 break;
 
                             case 2: // Rechercher crashs par modèle
                                 System.out.print("Modèle : ");
                                 String modelCrash = sc.nextLine().trim();
                                 List<Crash> crashess = crashService.getByModele(modelCrash);
-                                if (!crashess.isEmpty()) crashess.forEach(System.out::println);
-                                else System.out.println("Aucun crash trouvé pour ce modèle.");
+                                if (!crashess.isEmpty()) {
+                                    for (Object c : crashess) {
+                                        System.out.println();
+                                        System.out.println(c);
+                                        System.out.println();
+                                    }
+                                } else System.out.println("Aucun crash trouvé pour ce modèle.");
                                 break;
 
                             case 3: // Rechercher crashs par constructeur
-                                System.out.print("Constructeur : ");
-                                String fabCrash = sc.nextLine().trim();
-                                List<Crash> crashes = crashService.getByFabricant(fabCrash);
-                                if (!crashes.isEmpty()) crashes.forEach(System.out::println);
-                                else System.out.println("Aucun crash trouvé pour ce constructeur.");
+                                String fabCrash = choisirConstructeur(avionService, sc);
+                                if (fabCrash != null) {
+                                    List<Crash> crashes = crashService.getByFabricant(fabCrash);
+                                    if (!crashes.isEmpty()) {
+                                        for (Object c : crashes) {
+                                            System.out.println(c);
+                                            System.out.println();
+                                        }
+                                    } else System.out.println("Aucun crash trouvé pour ce constructeur.");
+                                }
                                 break;
 
                             case 4: // Afficher tous les crashs
                                 List<Crash> allCrashs = crashService.getAll();
-                                if (!allCrashs.isEmpty()) allCrashs.forEach(System.out::println);
-                                else System.out.println("Aucun crash enregistré.");
+                                if (!allCrashs.isEmpty()) {
+                                    for (Object c : allCrashs) {
+                                        System.out.println(c);
+                                        System.out.println();
+                                    }
+                                } else System.out.println("Aucun crash enregistré.");
                                 break;
 
                             case 5: // Ajouter un crash

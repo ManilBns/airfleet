@@ -142,4 +142,40 @@ public class AvionService {
 
         return false;
     }
+    
+    public List<String> getAllConstructeurs() {
+        List<String> constructeurs = new ArrayList<>();
+        // On suppose que tu as une méthode getConnection() pour JDBC
+        String sql = "SELECT DISTINCT fabricant FROM avions";
+        try (Connection conn = Database.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                constructeurs.add(rs.getString("fabricant"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return constructeurs;
+    }
+    
+    public List<String> getAllModele() {
+        List<String> modele = new ArrayList<>();
+        // On suppose que tu as une méthode getConnection() pour JDBC
+        String sql = "SELECT DISTINCT modele FROM avions";
+        try (Connection conn = Database.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                modele.add(rs.getString("modele"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return modele;
+    }
+
 }
+
+
+
