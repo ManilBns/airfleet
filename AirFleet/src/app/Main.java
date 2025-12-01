@@ -3,7 +3,7 @@ package app;
 import java.util.List;
 import java.util.Scanner;
 import java.sql.Date;
-
+import service.Function;
 import model.Avion;
 import model.Crash;
 import service.AvionService;
@@ -11,10 +11,7 @@ import service.CrashService;
 import nativeLib.NativeLib;
 
 public class Main {
-
     // Méthode pour choisir un constructeur parmi ceux existants
-   
-
     public static void main(String[] args) {
 
         AvionService avionService = new AvionService();
@@ -68,49 +65,11 @@ public class Main {
                     break;
 
                 case 4: // Ajouter un avion
-                    System.out.println("\n=== AJOUT D'UN AVION ===");
-                    System.out.println("Tapez 'menu' pour revenir au menu principal.\n");
-                    System.out.print("Fabricant : ");
-                    String fab = sc.nextLine().trim();
-                    if (fab.equalsIgnoreCase("menu")) break;
-                    System.out.print("Modèle : ");
-                    String mod = sc.nextLine().trim();
-                    if (mod.equals("menu")) break;
-                    System.out.print("Capacité : ");
-                    String capStr = sc.nextLine().trim();
-                    if (capStr.equalsIgnoreCase("menu")) break;
-                    int cap = Integer.parseInt(capStr);
-                    System.out.print("Autonomie (km) : ");
-                    String autoStr = sc.nextLine().trim();
-                    if (autoStr.equalsIgnoreCase("menu")) break;
-                    int auto = Integer.parseInt(autoStr);
-                    System.out.print("Année d'entrée en service : ");
-                    String yearStr = sc.nextLine().trim();
-                    if (yearStr.equalsIgnoreCase("menu")) break;
-                    int year = Integer.parseInt(yearStr);
-                    Avion newAvion = new Avion(0, fab, mod, cap, auto, 0, year);
-                    avionService.add(newAvion);
-                    System.out.println("Avion ajouté avec succès !");
+                    Function.addPlane();
                     break;
 
                 case 5: // Supprimer un avion
-                    System.out.println("\n=== SUPPRESSION D'UN AVION ===");
-                    System.out.println("Tapez 'menu' pour revenir au menu principal.\n");
-                    System.out.print("ID de l’avion à supprimer : ");
-                    String idStr = sc.nextLine().trim();
-                    // Retour au menu ?
-                    if (idStr.equalsIgnoreCase("menu")) break;
-                    // Vérification si nombre valide
-                    int id;
-                    try {
-                        id = Integer.parseInt(idStr);
-                    } catch (NumberFormatException e) {
-                        System.out.println("❌ Veuillez entrer un nombre valide.");
-                        break; // retour au menu principal
-                    }
-                    boolean ok = avionService.delete(id);
-                    System.out.println(ok ? "Suppression réussie !" : "Échec de la suppression (ID introuvable).");
-                    break;
+                    Function.suppPlane();
 
                 case 6: // Statistiques
                     int sousChoix;
@@ -139,37 +98,8 @@ public class Main {
 
                         switch (sousChoix) {
                             case 1: // Résumé constructeur
-                                String fabStat = AvionService.choisirConstructeur(avionService, sc);
-                                if (fabStat != null) {
-                                    List<Avion> avionsFilter = avionService.searchByFabricant(fabStat);
-                                    if (!avionsFilter.isEmpty()) {
-                                        Avion[] tabFilter = avionsFilter.toArray(new Avion[0]);
-                                        System.out.println("Moyenne autonomie : " + nativeLib.moyenneAutonomie(tabFilter));
-                                        System.out.println("Moyenne de crash : " + nativeLib.moyenneCrashs(tabFilter));
-
-                                        int totalCrashs = crashService.countByConstructeur(fabStat);
-                                        int totalMorts = crashService.totalMortsParFabricant(fabStat);
-                                        System.out.println("Nombre total de crashs : " + totalCrashs);
-                                        System.out.println("Nombre total de morts : " + totalMorts);
-
-                                        Avion[] topFiabilite = nativeLib.trierParCrashs(tabFilter);
-                                        System.out.println("\nTop 3 avions les plus fiables :");
-                                        for (int i = 0; i < Math.min(3, topFiabilite.length); i++)
-                                            System.out.println((i + 1) + " — " + topFiabilite[i] +
-                                                    " (Crashs : " + crashService.countByAvion(topFiabilite[i].getId()) + ")");
-
-                                        Avion[] topAutonomie = nativeLib.trierParAutonomie(tabFilter);
-                                        System.out.println("\nTop 3 avions les plus autonomes :");
-                                        for (int i = topAutonomie.length - 1; i >= Math.max(0, topAutonomie.length - 3); i--)
-                                            System.out.println((topAutonomie.length - i) + " — " + topAutonomie[i]);
-
-                                        Avion pireAvion = topFiabilite[topFiabilite.length - 1];
-                                        System.out.println("\nPire avion en termes de sécurité :");
-                                        System.out.println("Modèle : " + pireAvion.getModele() +
-                                                ", Nombre de crashs : " + crashService.countByAvion(pireAvion.getId()));
-                                    } else System.out.println("Aucun avion trouvé pour ce constructeur.");
-                                }
-                                break;
+                            	Function.tri();
+                            	break;
 
                             case 2: // Rechercher crashs par modèle
                                 String modelCrash = AvionService.choisirModele(avionService, sc);
@@ -205,65 +135,11 @@ public class Main {
                                 break;
 
                             case 5: // Ajouter un crash
-                                System.out.println("\n=== AJOUT D'UN CRASH ===");
-                                System.out.println("Tapez 'menu' à tout moment pour revenir au menu principal.\n");
-
-                                try {
-                                    System.out.print("ID de l’avion : ");
-                                    String avionIdStr = sc.nextLine().trim();
-                                    if (avionIdStr.equalsIgnoreCase("menu")) break;
-                                    int avionId = Integer.parseInt(avionIdStr);
-                                    String crashModele = AvionService.choisirModele(avionService, sc);
-                                    if (crashModele == null) break;
-                                    System.out.print("Date du crash (YYYY-MM-DD) : ");
-                                    String dateStr = sc.nextLine().trim();
-                                    if (dateStr.equalsIgnoreCase("menu")) break;
-                                    Date dateCrash = Date.valueOf(dateStr);
-                                    System.out.print("Lieu : ");
-                                    String lieu = sc.nextLine().trim();
-                                    if (lieu.equalsIgnoreCase("menu")) break;
-                                    System.out.print("Gravité : ");
-                                    String gravite = sc.nextLine().trim();
-                                    if (gravite.equalsIgnoreCase("menu")) break;
-                                    System.out.print("Nombre de morts : ");
-                                    String mortsStr = sc.nextLine().trim();
-                                    if (mortsStr.equalsIgnoreCase("menu")) break;
-                                    int morts = Integer.parseInt(mortsStr);
-                                    System.out.print("Nombre de blessés : ");
-                                    String blessesStr = sc.nextLine().trim();
-                                    if (blessesStr.equalsIgnoreCase("menu")) break;
-                                    int blesses = Integer.parseInt(blessesStr);
-                                    System.out.print("Cause : ");
-                                    String cause = sc.nextLine().trim();
-                                    if (cause.equalsIgnoreCase("menu")) break;
-                                    System.out.print("Description : ");
-                                    String desc = sc.nextLine().trim();
-                                    if (desc.equalsIgnoreCase("menu")) break;
-                                    Crash newCrash = new Crash(0, avionId, crashModele, dateCrash, lieu, gravite, morts, blesses, cause, desc);
-                                    crashService.addCrash(newCrash);
-                                    System.out.println("Crash ajouté avec succès !");
-                                } catch (IllegalArgumentException e) {
-                                    System.out.println("❌ Format de date invalide ! Utilisez YYYY-MM-DD.");
-                                }
+                                Function.addCrash();
                                 break;
-
 
                             case 6: // Supprimer un crash
-                                System.out.println("\n=== SUPPRESSION D'UN CRASH ===");
-                                System.out.println("Tapez 'menu' pour revenir au menu principal.\n");
-                                System.out.print("ID du crash à supprimer : ");
-                                String crashIdStr = sc.nextLine().trim();
-                                if (crashIdStr.equalsIgnoreCase("menu")) break;
-                                int crashId;
-                                try {
-                                    crashId = Integer.parseInt(crashIdStr);
-                                } catch (NumberFormatException e) {
-                                    System.out.println("❌ Veuillez entrer un nombre valide.");
-                                    break;
-                                }
-                                boolean supprOk = crashService.deleteCrash(crashId);
-                                System.out.println(supprOk ? "Crash supprimé avec succès !" : "ID introuvable.");
-                                break;
+                                Function.suppCrash();
                         }
                         
                     } while (sousChoix != 0);

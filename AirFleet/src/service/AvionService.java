@@ -2,13 +2,10 @@ package service;
 
 import database.Database;
 import model.Avion;
-import model.Crash;
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-
 public class AvionService {
     public List<Avion> getAll() {
         List<Avion> avions = new ArrayList<>();
@@ -238,6 +235,7 @@ public class AvionService {
 
         return modeles.get(choix - 1);
     }
+    
 }
 
 
