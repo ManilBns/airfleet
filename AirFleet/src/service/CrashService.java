@@ -141,7 +141,7 @@ public class CrashService {
 
     // Nombre de crashs pour un avion
     public int countByAvion(int avionId) {
-        String sql = "SELECT COUNT(*) as nb FROM crash WHERE avion_id = ?";
+        String sql = "SELECT crashs as nb FROM avions WHERE id = ?";
         try (Connection conn = Database.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, avionId);
@@ -153,9 +153,9 @@ public class CrashService {
         return 0;
     }
 
-    // Nombre de crashs pour un modèle
+   /* // Nombre de crashs pour un modèle
     public int countByModele(String modele) {
-        String sql = "SELECT COUNT(*) as nb FROM crash c JOIN avions a ON c.avion_id = a.id WHERE a.modele = ?";
+        String sql = "SELECT crashs as nb FROM avions where modele = ?";
         try (Connection conn = Database.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, modele);
@@ -166,7 +166,7 @@ public class CrashService {
         }
         return 0;
     }
-
+	
     // Total morts par avion
     public int totalMortsParAvion(int avionId) {
         String sql = "SELECT SUM(morts) as s FROM crash WHERE avion_id = ?";
@@ -194,7 +194,7 @@ public class CrashService {
         }
         return 0;
     }
-
+*/
     // Total morts par fabricant
     public int totalMortsParFabricant(String fabricant) {
         String sql = "SELECT SUM(c.morts) as s FROM crash c JOIN avions a ON c.avion_id = a.id WHERE a.fabricant = ?";
@@ -208,4 +208,20 @@ public class CrashService {
         }
         return 0;
     }
+    
+    // nombre de crashs par constructeur 
+    public int countByConstructeur(String fabricant) {
+        String sql = "SELECT sum(crashs) as nb FROM avions where fabricant = ?";
+        try (Connection conn = Database.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, fabricant);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getInt("nb");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
 }
+
+

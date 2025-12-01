@@ -112,12 +112,13 @@ public class Main {
                                 System.out.print("Entrez le constructeur : ");
                                 String fabStat = sc.nextLine().trim();
                                 List<Avion> avionsFilter = avionService.searchByFabricant(fabStat);
-
+                                
                                 if (!avionsFilter.isEmpty()) {
                                     Avion[] tabFilter = avionsFilter.toArray(new Avion[0]);
                                     System.out.println("Moyenne autonomie : " + nativeLib.moyenneAutonomie(tabFilter));
+                                    System.out.println("Moyenne de crash : " + nativeLib.moyenneCrashs(tabFilter));
 
-                                    int totalCrashs = crashService.getByFabricant(fabStat).size();
+                                    int totalCrashs = crashService.countByConstructeur(fabStat);
                                     int totalMorts = crashService.totalMortsParFabricant(fabStat);
                                     System.out.println("Nombre total de crashs : " + totalCrashs);
                                     System.out.println("Nombre total de morts : " + totalMorts);

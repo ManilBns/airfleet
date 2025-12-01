@@ -59,7 +59,8 @@ double moyenneCrashs(Node* head) {
         count++;
         current = current->next;
     }
-    return (double)sum / count;
+    double res = sum / count ;
+    return res / 100 ;
 }
 
 // --------------------------------------------------

@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "nativeLib_NativeLib.h"
+#include <math.h>
+
 
 // Une structure Avion simplifiée pour manipuler en C
 typedef struct {
@@ -126,6 +128,8 @@ JNIEXPORT jobjectArray JNICALL Java_nativeLib_NativeLib_trierParAutonomie
 }
 
 // ----------------- MOYENNE CRASHS -----------------
+#include <math.h>
+
 JNIEXPORT jdouble JNICALL Java_nativeLib_NativeLib_moyenneCrashs
   (JNIEnv *env, jobject obj, jobjectArray jAvions) {
 
@@ -138,9 +142,14 @@ JNIEXPORT jdouble JNICALL Java_nativeLib_NativeLib_moyenneCrashs
         Avion a = getAvion(env, jAvion);
         sum += a.crashs;
     }
-    return sum / len;
-}
 
+    double result = sum / len / 100;
+
+    // 🔥 Arrondi à 4 décimales
+    result = round(result * 10000.0) / 10000.0;
+
+    return result;
+}
 // ----------------- MOYENNE AUTONOMIE -----------------
 JNIEXPORT jdouble JNICALL Java_nativeLib_NativeLib_moyenneAutonomie
   (JNIEnv *env, jobject obj, jobjectArray jAvions) {
@@ -154,5 +163,7 @@ JNIEXPORT jdouble JNICALL Java_nativeLib_NativeLib_moyenneAutonomie
         Avion a = getAvion(env, jAvion);
         sum += a.autonomie;
     }
-    return sum / len;
+    double result = sum / len;
+    result = round(result * 10000.0) / 10000.0;
+    return result;
 }

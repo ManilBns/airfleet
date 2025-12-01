@@ -5,7 +5,7 @@ import model.Avion;
 public class NativeLib {
 
     static {
-        System.loadLibrary("AirFleetC"); // le .dll ou .so compilé depuis C
+        System.loadLibrary("AirFleetC"); // le .dll compilé depuis C
     }
 
     // Fonctions natives

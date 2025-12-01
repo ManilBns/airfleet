@@ -27,7 +27,7 @@ public class Crash {
         this.description = description;
     }
 
-    // getters (et setters si besoin)
+    // getters
     public int getId() { return id; }
     public int getAvionId() { return avionId; }
     public Date getDateCrash() { return dateCrash; }
