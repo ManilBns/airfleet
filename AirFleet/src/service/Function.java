@@ -33,13 +33,13 @@ public class Function {
 	            Avion[] topFiabilite = nativeLib.trierParCrashs(tabFilter);
 	            System.out.println("\nTop 3 avions les plus fiables :");
 	            for (int i = 0; i < Math.min(3, topFiabilite.length); i++)
-	                System.out.println((i + 1) + " — " + topFiabilite[i] +
+	                System.out.println((i + 1) + ". " + topFiabilite[i] +
 	                        " (Crashs : " + crashService.countByAvion(topFiabilite[i].getId()) + ")");
 	
 	            Avion[] topAutonomie = nativeLib.trierParAutonomie(tabFilter);
 	            System.out.println("\nTop 3 avions les plus autonomes :");
 	            for (int i = topAutonomie.length - 1; i >= Math.max(0, topAutonomie.length - 3); i--)
-	                System.out.println((topAutonomie.length - i) + " — " + topAutonomie[i]);
+	                System.out.println((topAutonomie.length - i) + ". " + topAutonomie[i]);
 	
 	            Avion pireAvion = topFiabilite[topFiabilite.length - 1];
 	            System.out.println("\nPire avion en termes de sécurité :");
@@ -174,7 +174,7 @@ public class Function {
         try {
             id = Integer.parseInt(idStr);
         } catch (NumberFormatException e) {
-            System.out.println("❌ Veuillez entrer un nombre valide.");
+            System.out.println(" Veuillez entrer un nombre valide.");
             return; // retour au menu principal
         }
         boolean ok = avionService.delete(id);

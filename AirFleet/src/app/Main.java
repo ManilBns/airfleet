@@ -2,13 +2,11 @@ package app;
 
 import java.util.List;
 import java.util.Scanner;
-import java.sql.Date;
 import service.Function;
 import model.Avion;
 import model.Crash;
 import service.AvionService;
 import service.CrashService;
-import nativeLib.NativeLib;
 
 public class Main {
     // Méthode pour choisir un constructeur parmi ceux existants
@@ -16,11 +14,9 @@ public class Main {
 
         AvionService avionService = new AvionService();
         CrashService crashService = new CrashService();
-        NativeLib nativeLib = new NativeLib();
         Scanner sc = new Scanner(System.in);
 
         int choix;
-
         do {
             System.out.println("\n===== BASE DE DONNÉES AVIONS =====");
             System.out.println("1. Afficher tous les avions");
