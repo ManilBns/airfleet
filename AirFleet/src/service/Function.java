@@ -120,49 +120,71 @@ public class Function {
         System.out.println("Tapez 'menu' à n'importe quelle étape pour revenir au menu principal.\n");
 
         try {
-            // Fabricant
-            System.out.print("Fabricant : ");
-            String fab = sc.nextLine().trim();
-            if (fab.equalsIgnoreCase("menu")) return;
+            // --- CHOIX DU CONSTRUCTEUR ---
+            System.out.println("Voulez-vous choisir un constructeur existant ? (O/N)");
+            String choixFab = sc.nextLine().trim();
+            if (choixFab.equalsIgnoreCase("menu")) return;
+
+            String fab;
+            if (choixFab.equalsIgnoreCase("O")) {
+                fab = AvionService.choisirConstructeur(avionService, sc);
+                if (fab == null) return; // retour menu
+            } else {
+                System.out.print("Saisissez le constructeur : ");
+                fab = sc.nextLine().trim();
+                if (fab.equalsIgnoreCase("menu")) return;
+            }
+
+            // --- CHOIX DU MODELE ---
             System.out.println("Voulez-vous choisir un modèle existant ? (O/N)");
             String choixModele = sc.nextLine().trim();
             if (choixModele.equalsIgnoreCase("menu")) return;
+
             String mod;
             if (choixModele.equalsIgnoreCase("O")) {
                 mod = AvionService.choisirModele(avionService, sc);
-                if (mod == null) return;
+                if (mod == null) return; // retour menu
             } else {
                 System.out.print("Saisissez le modèle : ");
                 mod = sc.nextLine().trim();
                 if (mod.equalsIgnoreCase("menu")) return;
             }
+
+            // Capacité
             System.out.print("Capacité : ");
             String capStr = sc.nextLine().trim();
             if (capStr.equalsIgnoreCase("menu")) return;
             int cap = Integer.parseInt(capStr);
+
+            // Autonomie
             System.out.print("Autonomie (km) : ");
             String autoStr = sc.nextLine().trim();
             if (autoStr.equalsIgnoreCase("menu")) return;
             int auto = Integer.parseInt(autoStr);
-            // Crash
+
+            // Crashs
             System.out.print("Nombre de crashs : ");
             String crStr = sc.nextLine().trim();
             if (crStr.equalsIgnoreCase("menu")) return;
             int crr = Integer.parseInt(crStr);
-            // Année d'entrée en service
+
+            // Année
             System.out.print("Année d'entrée en service : ");
             String yearStr = sc.nextLine().trim();
             if (yearStr.equalsIgnoreCase("menu")) return;
             int year = Integer.parseInt(yearStr);
-            // Création de l'avion
+
+            // Création objet
             Avion newAvion = new Avion(0, fab, mod, cap, auto, crr, year);
             avionService.add(newAvion);
+
             System.out.println(" Avion ajouté avec succès !");
 
         } catch (NumberFormatException e) {
             System.out.println(" Veuillez saisir un nombre valide pour la capacité, les crashs ou l'année.");
         }
     }
+
     
     public static void suppPlane() {
     	System.out.println("\n=== SUPPRESSION D'UN AVION ===");
