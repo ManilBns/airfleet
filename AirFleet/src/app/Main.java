@@ -37,27 +37,15 @@ public class Main {
 
             switch (choix) {
                 case 1: // Afficher tous les avions
-                    List<Avion> all = avionService.getAll();
-                    if (!all.isEmpty()) all.forEach(System.out::println);
-                    else System.out.println("Aucun avion trouvé.");
+                    Function.afficherAvion();
                     break;
 
                 case 2: // Recherche par modèle
-                    String modele = AvionService.choisirModele(avionService, sc);
-                    if (modele != null) {
-                        Avion avion = avionService.searchByModel(modele);
-                        if (avion != null) System.out.println(avion);
-                        else System.out.println("Aucun avion trouvé pour ce modèle.");
-                    }
+                    Function.RechercheModele();
                     break;
 
                 case 3: // Recherche par constructeur
-                    String fabricant = AvionService.choisirConstructeur(avionService, sc);
-                    if (fabricant != null) {
-                        List<Avion> fabList = avionService.searchByFabricant(fabricant);
-                        if (!fabList.isEmpty()) fabList.forEach(System.out::println);
-                        else System.out.println("Aucun avion trouvé pour ce constructeur.");
-                    }
+                    Function.RechercheConstructeur();
                     break;
 
                 case 4: // Ajouter un avion
