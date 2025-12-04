@@ -22,27 +22,24 @@ public class Function {
 	    if (fabStat != null) {
 	        List<Avion> avionsFilter = avionService.searchByFabricant(fabStat);
 	        if (!avionsFilter.isEmpty()) {
-	            Avion[] tabFilter = avionsFilter.toArray(new Avion[0]);
+	            Avion[] tabFilter = avionsFilter.toArray(new Avion[0]); //on convertit en tableau car dans jni on attend un tableau pour les tris
 	            System.out.println("Moyenne autonomie : " + nativeLib.moyenneAutonomie(tabFilter));
 	            System.out.println("Moyenne de crash : " + nativeLib.moyenneCrashs(tabFilter));
-	
 	            int totalCrashs = crashService.countByConstructeur(fabStat);
 	            int totalMorts = crashService.totalMortsParFabricant(fabStat);
 	            System.out.println("Nombre total de crashs : " + totalCrashs);
 	            System.out.println("Nombre total de morts : " + totalMorts);
-	
 	            Avion[] topFiabilite = nativeLib.trierParCrashs(tabFilter);
 	            System.out.println("\nTop 3 avions les plus fiables :");
-	            for (int i = 0; i < Math.min(3, topFiabilite.length); i++)
+	            for (int i = 0; i < Math.min(3, topFiabilite.length); i++) // Math.min(3, topFiabilite.length) prend le min entre 3 et nombre d'elt dans tableau
 	                System.out.println((i + 1) + ". " + topFiabilite[i] +
-	                        " (Crashs : " + crashService.countByAvion(topFiabilite[i].getId()) + ")");
-	
+	                        " (Crashs : " + crashService.countByAvion(topFiabilite[i].getId()) + ")");	
 	            Avion[] topAutonomie = nativeLib.trierParAutonomie(tabFilter);
 	            System.out.println("\nTop 3 avions les plus autonomes :");
-	            for (int i = topAutonomie.length - 1; i >= Math.max(0, topAutonomie.length - 3); i--)
-	                System.out.println((topAutonomie.length - i) + ". " + topAutonomie[i]);
-	
-	            Avion pireAvion = topFiabilite[topFiabilite.length - 1];
+	            for (int i = topAutonomie.length - 1; i >= Math.max(0, topAutonomie.length - 3); i--) /*on parcours le tableau a l'envers pour prendre les plus autonomes , 
+	            topAutonomie.length - 3 = 3eme indice depuis  la fin , mathmax(0..) s'assure que le tableau ne descende jamais a un indice negatif pour eviter une erreur				*/
+	                System.out.println((topAutonomie.length - i) + ". " + topAutonomie[i]);	
+	            Avion pireAvion = topFiabilite[topFiabilite.length - 1]; //topFiabilite.length - 1 = dernier indice donc l'avion le moins fiable de la liste des avions 
 	            System.out.println("\nPire avion en termes de sécurité :");
 	            System.out.println("Modèle : " + pireAvion.getModele() +
 	                    ", Nombre de crashs : " + crashService.countByAvion(pireAvion.getId()));
@@ -54,8 +51,12 @@ public class Function {
     public static void addCrash() {
         System.out.println("\n=== AJOUT D'UN CRASH ===");
         System.out.println("Tapez 'menu' à n'importe quelle étape pour revenir au menu principal.\n");
-
         try {
+        	 /*  ( le fonctionnement est pareil partout : 
+         	sc.nextline.trim permet de lire ce que l'utilisateur a ecris jusqu(a avoir appuyer sur entrée , trim fais  en sorte
+         	d'ignorer les espaces , ensuite iInteger.parseInt s'occupe de transformer le string en int 
+             */
+        	
             // ID de l'avion
             System.out.print("ID de l'avion : ");
             String avionIdStr = sc.nextLine().trim();
@@ -108,18 +109,16 @@ public class Function {
             if (desc.equalsIgnoreCase("menu")) return;
             // Création du crash
             Crash newCrash = new Crash(0, avionId, crashModele, dateCrash, lieu, gravite, morts, blesses, cause, desc);
-            crashService.addCrash(newCrash);
+            crashService.addCrash(newCrash); //le mettre dans la bdd pour la sync 
             System.out.println(" Crash ajouté avec succès !");
         } catch (IllegalArgumentException e) {
             System.out.println(" Format de date invalide ! Utilisez YYYY-MM-DD.");
         }
     }
 
-    
     public static void addPlane() {
         System.out.println("\n=== AJOUT D'UN AVION ===");
         System.out.println("Tapez 'menu' à n'importe quelle étape pour revenir au menu principal.\n");
-
         try {
             // --- CHOIX DU CONSTRUCTEUR ---
             System.out.println("Voulez-vous choisir un constructeur existant ? (O/N)");
@@ -128,7 +127,6 @@ public class Function {
 
             String fab;
             boolean constructeurExiste = false;
-
             if (choixFab.equalsIgnoreCase("O")) {
                 fab = AvionService.choisirConstructeur(avionService, sc);
                 if (fab == null) return; // retour menu
@@ -142,10 +140,8 @@ public class Function {
                 List<String> existing = avionService.getAllConstructeurs();
                 constructeurExiste = existing.contains(fab);
             }
-
             // --- CHOIX DU MODÈLE ---
             String mod;
-
             if (constructeurExiste) {
                 System.out.println("Voulez-vous choisir un modèle existant ? (O/N)");
                 String choixModele = sc.nextLine().trim();
@@ -160,7 +156,6 @@ public class Function {
                     mod = sc.nextLine().trim();
                     if (mod.equalsIgnoreCase("menu")) return;
                 }
-
             } else {
                 // Nouveau constructeur → modèle obligatoire
                 System.out.println("Ce constructeur n'existe pas encore vous devez saisir un nouveau modèle.");
@@ -168,44 +163,35 @@ public class Function {
                 mod = sc.nextLine().trim();
                 if (mod.equalsIgnoreCase("menu")) return;
             }
-
             // --- SAISIE DES AUTRES INFORMATIONS ---
             System.out.print("Capacité : ");
             String capStr = sc.nextLine().trim();
             if (capStr.equalsIgnoreCase("menu")) return;
             int cap = Integer.parseInt(capStr);
-
             System.out.print("Autonomie (km) : ");
             String autoStr = sc.nextLine().trim();
             if (autoStr.equalsIgnoreCase("menu")) return;
             int auto = Integer.parseInt(autoStr);
-
             System.out.print("Nombre de crashs : ");
             String crStr = sc.nextLine().trim();
             if (crStr.equalsIgnoreCase("menu")) return;
             int crr = Integer.parseInt(crStr);
-
             System.out.print("Année d'entrée en service : ");
             String yearStr = sc.nextLine().trim();
             if (yearStr.equalsIgnoreCase("menu")) return;
             int year = Integer.parseInt(yearStr);
-
             if (year < 1903 || year > 2025) {
                 System.out.println("Année invalide ! Elle doit être comprise entre 1903 et 2025.");
                 return;
             }
-
             // --- AJOUT EN BDD ---
             Avion newAvion = new Avion(0, fab, mod, cap, auto, crr, year);
             avionService.add(newAvion);
-
             System.out.println("Avion ajouté avec succès !");
-
         } catch (NumberFormatException e) {
             System.out.println("Veuillez saisir un nombre valide pour la capacité, les crashs ou l'année.");
         }
     }
-
 
     public static void suppPlane() {
         System.out.println("\n=== SUPPRESSION D'UN AVION ===");
@@ -221,11 +207,11 @@ public class Function {
             return;
         }
         // Vérification que l'avion existe (optionnel mais conseillé)
-        Avion avion = avionService.getAll().stream()
+        Avion avion = avionService.getAll().stream() //stream permet de convertir en flux afin de pouvoir utiliser filter
                          .filter(a -> a.getId() == id)
                          .findFirst()
-                         .orElse(null);
-        
+                         .orElse(null); /*Parmi tous les avions récupérés par avionService.getAll(), cherche celui dont l’ID est égal à id.
+        Si tu en trouves un, prends-le ; sinon, mets avion à null */
         if (avion == null) {
             System.out.println("ID introuvable.");
             return;
@@ -238,7 +224,7 @@ public class Function {
             return;
         }
         boolean ok = avionService.delete(id);
-        System.out.println(ok ? "Suppression réussie !" : "Échec de la suppression.");
+        System.out.println(ok ? "Suppression réussie !" : "Échec de la suppression."); //grace a boolean ok = avionService.delete(id);
     }
 
     public static void suppCrash() {
@@ -285,18 +271,18 @@ public class Function {
     }
     
     public static void RechercheModele() {
-    	String modele = AvionService.choisirModele(avionService, sc);
+    	String modele = AvionService.choisirModele(avionService, sc); //modele est pris a partir du choix dynamique grace a choisirmodele
         if (modele != null) {
-            Avion avion = avionService.searchByModel(modele);
+            Avion avion = avionService.searchByModel(modele); //liste des avions dont le modele est 'modele'
             if (avion != null) System.out.println(avion);
             else System.out.println("Aucun avion trouvé pour ce modèle.");
         }
     }
     
     public static void RechercheConstructeur() {
-    	String fabricant = AvionService.choisirConstructeur(avionService, sc);
+    	String fabricant = AvionService.choisirConstructeur(avionService, sc); //fabricant est pris a partir du choix dynamique grace a choisirConstructeur
         if (fabricant != null) {
-            List<Avion> fabList = avionService.searchByFabricant(fabricant);
+            List<Avion> fabList = avionService.searchByFabricant(fabricant); //liste des avions dont le constructeur est 'fabricant'
             if (!fabList.isEmpty()) fabList.forEach(System.out::println);
             else System.out.println("Aucun avion trouvé pour ce constructeur.");
         }
@@ -305,13 +291,11 @@ public class Function {
     public static void modifyPlane() {
         System.out.println("\n=== MODIFICATION D'UN AVION ===");
         System.out.println("Tapez 'menu' à n'importe quelle étape pour revenir au menu principal.\n");
-
         List<Avion> avions = avionService.getAll();
         if (avions.isEmpty()) {
             System.out.println("Aucun avion disponible pour modification.");
             return;
         }
-
         // Affichage de tous les avions
         System.out.println("Liste des avions :");
         for (Avion a : avions) {
@@ -320,23 +304,21 @@ public class Function {
                     " | Crashs: " + a.getCrashs() + " | Année: " + a.getAnneeService());
         }
         System.out.println("0. Retour au menu principal (ou tapez 'menu')");
-
         // Choix de l'avion à modifier
         Avion selectedAvion = null;
         while (true) {
             System.out.print("Entrez l'ID de l'avion à modifier : ");
             String input = sc.nextLine().trim();
             if (input.equalsIgnoreCase("menu") || input.equals("0")) return;
-
             try {
                 int id = Integer.parseInt(input);
-                for (Avion a : avions) {
+                for (Avion a : avions) { //si l'id existe dans la liste d'avions alors selectedAvion devient l'avion de cet id et on sort de la boucle
                     if (a.getId() == id) {
                         selectedAvion = a;
                         break;
                     }
                 }
-                if (selectedAvion != null) break;
+                if (selectedAvion != null) break; //si selectedAvion est trouvé on sort du try 
                 else System.out.println("ID incorrect. Réessayez.");
             } catch (NumberFormatException e) {
                 System.out.println("ID incorrect. Réessayez.");
@@ -346,43 +328,57 @@ public class Function {
         try {
             // --- MODIFICATION DU CONSTRUCTEUR ---
             System.out.println("Constructeur actuel : " + selectedAvion.getFabricant());
-
             List<String> allConstructeurs = avionService.getAllConstructeurs();
-            String fab = selectedAvion.getFabricant();
-
-            if (!allConstructeurs.isEmpty()) {
+            String fab = selectedAvion.getFabricant(); //le fabricant de l'avion choisis précédemment
+            if (!allConstructeurs.isEmpty()) { //choix dynamique de tous les constructeurs
                 System.out.println("Constructeurs existants :");
                 for (int i = 0; i < allConstructeurs.size(); i++) {
                     System.out.println((i + 1) + ". " + allConstructeurs.get(i));
                 }
-                System.out.print("Sélectionnez un constructeur par numéro ou ENTER pour garder : ");
-                String choixFab = sc.nextLine().trim();
-                if (choixFab.equalsIgnoreCase("menu")) return;
-                if (!choixFab.isEmpty()) {
-                    try {
-                        int numFab = Integer.parseInt(choixFab);
-                        if (numFab < 1 || numFab > allConstructeurs.size()) {
-                            System.out.println("Numéro incorrect.");
-                            return;
-                        }
-                        fab = allConstructeurs.get(numFab - 1);
-                        selectedAvion.setFabricant(fab);
-                    } catch (NumberFormatException e) {
-                        System.out.println("Numéro incorrect.");
-                        return;
-                    }
-                }
-            } else {
-                System.out.print("Nouveau constructeur : ");
-                String newFab = sc.nextLine().trim();
-                if (newFab.equalsIgnoreCase("menu")) return;
-                if (!newFab.isEmpty()) fab = newFab;
-                selectedAvion.setFabricant(fab);
             }
 
-            boolean constructeurExiste = avionService.getAllConstructeurs().contains(fab);
+            System.out.print("Sélectionnez un constructeur par numéro / tapez ENTER pour garder / saisir un nouveau : ");
+            String choixFab = sc.nextLine().trim();
+            if (choixFab.equalsIgnoreCase("menu")) return;
+            if (!choixFab.isEmpty()) {
+                boolean choixValide = false;
+                // Vérifier si c'est un numéro existant
+                try {
+                    int numFab = Integer.parseInt(choixFab);
+                    if (numFab >= 1 && numFab <= allConstructeurs.size()) {
+                        fab = allConstructeurs.get(numFab - 1); //récuperer le bon constructeur  de la liste de choix dynamique, get(numFab - 1) = s'il tape 1 il aura le premier constructeur allConstructeur.get(0) 
+                        selectedAvion.setFabricant(fab);
+                        choixValide = true;
+                    }
+                } catch (NumberFormatException ignored) {}
 
+                if (!choixValide) {
+                    // Saisie d'un nouveau constructeur libre si le choix n'était pas valide plus haut
+                    fab = choixFab;
+                    selectedAvion.setFabricant(fab);
+                    //modèle pour la const 
+                    System.out.print("Nouveau modèle pour ce constructeur : ");
+                    String newMod = sc.nextLine().trim();
+                    if (newMod.equalsIgnoreCase("menu")) {
+                        return;
+                    }
+                    if(newMod.isEmpty()) {
+                    	System.out.println("Ne pas entrer de modèle vide ! ");
+                    	return;
+                    }
+                    selectedAvion.setModele(newMod);                     
+                }
+            }
             // --- MODIFICATION DU MODÈLE ---
+            boolean constructeurExiste = false;
+            for (String c : allConstructeurs) {
+                if (c.equalsIgnoreCase(fab)) {
+                    fab = c; // normaliser la casse pour BDD
+                    constructeurExiste = true;
+                    selectedAvion.setFabricant(fab);
+                    break;
+                }
+            }
             if (constructeurExiste) {
                 List<String> modeles = avionService.getModelesByFabricant(fab);
                 if (!modeles.isEmpty()) {
@@ -390,41 +386,38 @@ public class Function {
                     for (int i = 0; i < modeles.size(); i++) {
                         System.out.println((i + 1) + ". " + modeles.get(i));
                     }
-                    System.out.print("Sélectionnez un modèle par numéro ou ENTER pour garder : ");
+                    System.out.print("Sélectionnez un modèle par numéro / Tapez ENTER pour garder / Saisir un nouveau : ");
                     String choixMod = sc.nextLine().trim();
                     if (choixMod.equalsIgnoreCase("menu")) return;
                     if (!choixMod.isEmpty()) {
                         try {
                             int numMod = Integer.parseInt(choixMod);
-                            if (numMod < 1 || numMod > modeles.size()) {
-                                System.out.println("Numéro incorrect.");
-                                return;
+                            if (numMod >= 1 && numMod <= modeles.size()) {
+                                selectedAvion.setModele(modeles.get(numMod - 1));
+                            } else {
+                                selectedAvion.setModele(choixMod); // saisie libre
                             }
-                            selectedAvion.setModele(modeles.get(numMod - 1));
                         } catch (NumberFormatException e) {
-                            System.out.println("Numéro incorrect.");
-                            return;
+                            selectedAvion.setModele(choixMod); // saisie libre
                         }
                     }
-                } else {
-                    System.out.print("Nouveau modèle : ");
+                } /*else {
+                    System.out.print("Aucun modèle existant. Saisissez un nouveau modèle : ");
                     String newMod = sc.nextLine().trim();
-                    if (newMod.equalsIgnoreCase("menu")) return;
+                    if (newMod.equalsIgnoreCase("menu") || newMod.isEmpty()) {
+                        System.out.println("Vous devez saisir un modèle.");
+                        return;
+                    }
                     selectedAvion.setModele(newMod);
-                }
-            } else {
-                System.out.print("Ce constructeur est nouveau. Saisissez un modèle : ");
-                String newMod = sc.nextLine().trim();
-                if (newMod.equalsIgnoreCase("menu")) return;
-                selectedAvion.setModele(newMod);
+                } */
             }
 
             // --- MODIFICATION DES AUTRES CHAMPS ---
-            System.out.println("Capacité actuelle : " + selectedAvion.getCapacite());
+            System.out.println("Capacité actuelle : " + selectedAvion.getCapacite()); //montre la capa actuelle
             System.out.print("Nouvelle capacité (ou ENTER pour garder) : ");
-            String capStr = sc.nextLine().trim();
+            String capStr = sc.nextLine().trim(); //l'utilisateur saisis la nouvelle capa
             if (capStr.equalsIgnoreCase("menu")) return;
-            if (!capStr.isEmpty()) selectedAvion.setCapacite(Integer.parseInt(capStr));
+            if (!capStr.isEmpty()) selectedAvion.setCapacite(Integer.parseInt(capStr)); //si capStr contient quelque chose alors sera set comme nouvelle capa
 
             System.out.println("Autonomie actuelle : " + selectedAvion.getAutonomie());
             System.out.print("Nouvelle autonomie (km) (ou ENTER pour garder) : ");
@@ -450,12 +443,10 @@ public class Function {
                 }
                 selectedAvion.setAnneeService(year);
             }
-
             // --- MISE À JOUR EN BDD ---
             String sql = "UPDATE avions SET fabricant = ?, modele = ?, capacite = ?, autonomie = ?, crashs = ?, annee_service = ? WHERE id = ?";
             try (Connection conn = Database.getConnection();
                  PreparedStatement ps = conn.prepareStatement(sql)) {
-
                 ps.setString(1, selectedAvion.getFabricant());
                 ps.setString(2, selectedAvion.getModele());
                 ps.setInt(3, selectedAvion.getCapacite());
@@ -463,10 +454,8 @@ public class Function {
                 ps.setInt(5, selectedAvion.getCrashs());
                 ps.setInt(6, selectedAvion.getAnneeService());
                 ps.setInt(7, selectedAvion.getId());
-
                 ps.executeUpdate();
             }
-
             System.out.println("Avion modifié avec succès !");
         } catch (NumberFormatException e) {
             System.out.println("Veuillez saisir un nombre valide.");
@@ -474,7 +463,6 @@ public class Function {
             System.out.println("Erreur SQL : " + e.getMessage());
         }
     }
-
 }
 
 

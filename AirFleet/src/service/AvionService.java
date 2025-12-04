@@ -9,13 +9,10 @@ import java.util.Scanner;
 public class AvionService {
     public List<Avion> getAll() {
         List<Avion> avions = new ArrayList<>();
-
         String sql = "SELECT * FROM avions";
-
         try (Connection conn = Database.getConnection(); //connection a la bd
              Statement stmt = conn.createStatement(); // permet d'executer les requetes
              ResultSet rs = stmt.executeQuery(sql)) { //permet de "stocker" le resultat de la query
-
             while (rs.next()) {
                 Avion a = new Avion(
                         rs.getInt("id"),
@@ -28,11 +25,9 @@ public class AvionService {
                 );
                 avions.add(a);
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return avions;
     }
 
@@ -41,13 +36,10 @@ public class AvionService {
     // -----------------------------
     public Avion searchByModel(String modele) {
         String sql = "SELECT * FROM avions WHERE modele = ?";
-
         try (Connection conn = Database.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-
             ps.setString(1, modele);
             ResultSet rs = ps.executeQuery();
-
             if (rs.next()) {
                 return new Avion(
                         rs.getInt("id"),
@@ -59,14 +51,11 @@ public class AvionService {
                         rs.getInt("annee_service")
                 );
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return null;
     }
-    
     
     // -----------------------------
     // Recherche par fabricant
@@ -143,9 +132,9 @@ public class AvionService {
         return false;
     }
     
+    //avoir tous les constructeurs
     public List<String> getAllConstructeurs() {
         List<String> constructeurs = new ArrayList<>();
-        // On suppose que tu as une méthode getConnection() pour JDBC
         String sql = "SELECT DISTINCT fabricant FROM avions";
         try (Connection conn = Database.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
@@ -159,9 +148,9 @@ public class AvionService {
         return constructeurs;
     }
     
+    //avoir tous les constructeurs
     public List<String> getAllModele() {
         List<String> modele = new ArrayList<>();
-        // On suppose que tu as une méthode getConnection() pour JDBC
         String sql = "SELECT DISTINCT modele FROM avions";
         try (Connection conn = Database.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
@@ -175,6 +164,7 @@ public class AvionService {
         return modele;
     }
     
+    // Méthode pour choisir un constructeur parmi ceux existants
     public static String choisirConstructeur(AvionService avionService, Scanner sc) {
         List<String> constructeurs = avionService.getAllConstructeurs();
         if (constructeurs.isEmpty()) {
