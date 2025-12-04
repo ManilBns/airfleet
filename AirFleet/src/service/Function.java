@@ -1,7 +1,14 @@
 package service;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+
+import database.Database;
+
+import java.sql.Connection;
 import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 import model.Avion;
 import model.Crash;
@@ -142,59 +149,59 @@ public class Function {
                 constructeurExiste = existing.contains(fab);
             }
 
-            // --- CHOIX DU MODELE ---
+            // --- CHOIX DU MODÈLE ---
             String mod;
 
             if (constructeurExiste) {
-                // Si le constructeur existe → proposer choix modèle existant
                 System.out.println("Voulez-vous choisir un modèle existant ? (O/N)");
                 String choixModele = sc.nextLine().trim();
                 if (choixModele.equalsIgnoreCase("menu")) return;
 
                 if (choixModele.equalsIgnoreCase("O")) {
-                    mod = AvionService.choisirModele(avionService, sc);
+                    // Utilisation de la fonction choisirModelePourConstructeur
+                    mod = AvionService.choisirModelePourConstructeur(avionService, sc, fab);
                     if (mod == null) return; // retour menu
                 } else {
                     System.out.print("Saisissez le modèle : ");
                     mod = sc.nextLine().trim();
                     if (mod.equalsIgnoreCase("menu")) return;
                 }
+
             } else {
-                // Si le constructeur est nouveau → modèle obligatoire
+                // Nouveau constructeur → modèle obligatoire
                 System.out.println("Ce constructeur n'existe pas encore vous devez saisir un nouveau modèle.");
                 System.out.print("Modèle : ");
                 mod = sc.nextLine().trim();
                 if (mod.equalsIgnoreCase("menu")) return;
             }
 
-            // Capacité
+            // --- SAISIE DES AUTRES INFORMATIONS ---
             System.out.print("Capacité : ");
             String capStr = sc.nextLine().trim();
             if (capStr.equalsIgnoreCase("menu")) return;
             int cap = Integer.parseInt(capStr);
 
-            // Autonomie
             System.out.print("Autonomie (km) : ");
             String autoStr = sc.nextLine().trim();
             if (autoStr.equalsIgnoreCase("menu")) return;
             int auto = Integer.parseInt(autoStr);
 
-            // Crashs
             System.out.print("Nombre de crashs : ");
             String crStr = sc.nextLine().trim();
             if (crStr.equalsIgnoreCase("menu")) return;
             int crr = Integer.parseInt(crStr);
 
-            // Année
             System.out.print("Année d'entrée en service : ");
             String yearStr = sc.nextLine().trim();
             if (yearStr.equalsIgnoreCase("menu")) return;
             int year = Integer.parseInt(yearStr);
+
             if (year < 1903 || year > 2025) {
                 System.out.println("Année invalide ! Elle doit être comprise entre 1903 et 2025.");
                 return;
             }
-            // Création objet
+
+            // --- AJOUT EN BDD ---
             Avion newAvion = new Avion(0, fab, mod, cap, auto, crr, year);
             avionService.add(newAvion);
 
@@ -204,6 +211,7 @@ public class Function {
             System.out.println("Veuillez saisir un nombre valide pour la capacité, les crashs ou l'année.");
         }
     }
+
 
     public static void suppPlane() {
         System.out.println("\n=== SUPPRESSION D'UN AVION ===");

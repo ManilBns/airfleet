@@ -236,6 +236,59 @@ public class AvionService {
         return modeles.get(choix - 1);
     }
     
+ // selectionner les modeles en fonction du fabricant et les afficher
+    public static String choisirModelePourConstructeur(AvionService avionService, Scanner sc, String fabricant) {
+        List<String> modeles = new ArrayList<>();
+        String sql = "SELECT DISTINCT modele FROM avions WHERE fabricant = ?";
+
+        try (Connection conn = Database.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, fabricant);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                modeles.add(rs.getString("modele"));
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Erreur SQL : " + e.getMessage());
+            return null;
+        }
+
+        if (modeles.isEmpty()) {
+            System.out.println("Aucun modèle existant pour " + fabricant);
+            return null;
+        }
+
+        // Affichage des modèles existants pour le constructeur
+        System.out.println("Modèles existants pour " + fabricant + " :");
+        for (int i = 0; i < modeles.size(); i++) {
+            System.out.println((i + 1) + ". " + modeles.get(i));
+        }
+        System.out.println("0. Retour au menu principal");
+
+        while (true) {
+            System.out.print("Votre choix : ");
+            String input = sc.nextLine().trim();
+
+            if (input.equalsIgnoreCase("menu") || input.equals("0")) {
+                return null; // Retour menu
+            }
+
+            try {
+                int choix = Integer.parseInt(input);
+                if (choix >= 1 && choix <= modeles.size()) {
+                    return modeles.get(choix - 1);
+                } else {
+                    System.out.println("Numéro incorrect. Réessayez.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Numéro incorrect. Réessayez.");
+            }
+        }
+    }
+
 }
 
 
