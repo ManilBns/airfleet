@@ -26,7 +26,35 @@ public class Avion {
     public String getModele() { return modele; }
     public int getCapacite() { return capacite; }
     public int getAutonomie() { return autonomie; }
-    public int getCrashs() { return crashs; }
+    public void setId(int id) {
+		this.id = id;
+	}
+
+	public void setFabricant(String fabricant) {
+		this.fabricant = fabricant;
+	}
+
+	public void setModele(String modele) {
+		this.modele = modele;
+	}
+
+	public void setCapacite(int capacite) {
+		this.capacite = capacite;
+	}
+
+	public void setAutonomie(int autonomie) {
+		this.autonomie = autonomie;
+	}
+
+	public void setCrashs(int crashs) {
+		this.crashs = crashs;
+	}
+
+	public void setAnneeService(int anneeService) {
+		this.anneeService = anneeService;
+	}
+
+	public int getCrashs() { return crashs; }
     public int getAnneeService() { return anneeService; }
 
     @Override

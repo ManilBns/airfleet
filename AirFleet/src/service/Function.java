@@ -1,19 +1,13 @@
 package service;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-
 import database.Database;
-
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-
+import java.sql.SQLException;
 import model.Avion;
 import model.Crash;
-import service.AvionService;
-import service.CrashService;
 import nativeLib.NativeLib;
 
 public class Function {
@@ -307,6 +301,180 @@ public class Function {
             else System.out.println("Aucun avion trouvé pour ce constructeur.");
         }
     }
+    
+    public static void modifyPlane() {
+        System.out.println("\n=== MODIFICATION D'UN AVION ===");
+        System.out.println("Tapez 'menu' à n'importe quelle étape pour revenir au menu principal.\n");
+
+        List<Avion> avions = avionService.getAll();
+        if (avions.isEmpty()) {
+            System.out.println("Aucun avion disponible pour modification.");
+            return;
+        }
+
+        // Affichage de tous les avions
+        System.out.println("Liste des avions :");
+        for (Avion a : avions) {
+            System.out.println(a.getId() + ". " + a.getFabricant() + " " + a.getModele() +
+                    " | Cap: " + a.getCapacite() + " | Auto: " + a.getAutonomie() +
+                    " | Crashs: " + a.getCrashs() + " | Année: " + a.getAnneeService());
+        }
+        System.out.println("0. Retour au menu principal (ou tapez 'menu')");
+
+        // Choix de l'avion à modifier
+        Avion selectedAvion = null;
+        while (true) {
+            System.out.print("Entrez l'ID de l'avion à modifier : ");
+            String input = sc.nextLine().trim();
+            if (input.equalsIgnoreCase("menu") || input.equals("0")) return;
+
+            try {
+                int id = Integer.parseInt(input);
+                for (Avion a : avions) {
+                    if (a.getId() == id) {
+                        selectedAvion = a;
+                        break;
+                    }
+                }
+                if (selectedAvion != null) break;
+                else System.out.println("ID incorrect. Réessayez.");
+            } catch (NumberFormatException e) {
+                System.out.println("ID incorrect. Réessayez.");
+            }
+        }
+
+        try {
+            // --- MODIFICATION DU CONSTRUCTEUR ---
+            System.out.println("Constructeur actuel : " + selectedAvion.getFabricant());
+
+            List<String> allConstructeurs = avionService.getAllConstructeurs();
+            String fab = selectedAvion.getFabricant();
+
+            if (!allConstructeurs.isEmpty()) {
+                System.out.println("Constructeurs existants :");
+                for (int i = 0; i < allConstructeurs.size(); i++) {
+                    System.out.println((i + 1) + ". " + allConstructeurs.get(i));
+                }
+                System.out.print("Sélectionnez un constructeur par numéro ou ENTER pour garder : ");
+                String choixFab = sc.nextLine().trim();
+                if (choixFab.equalsIgnoreCase("menu")) return;
+                if (!choixFab.isEmpty()) {
+                    try {
+                        int numFab = Integer.parseInt(choixFab);
+                        if (numFab < 1 || numFab > allConstructeurs.size()) {
+                            System.out.println("Numéro incorrect.");
+                            return;
+                        }
+                        fab = allConstructeurs.get(numFab - 1);
+                        selectedAvion.setFabricant(fab);
+                    } catch (NumberFormatException e) {
+                        System.out.println("Numéro incorrect.");
+                        return;
+                    }
+                }
+            } else {
+                System.out.print("Nouveau constructeur : ");
+                String newFab = sc.nextLine().trim();
+                if (newFab.equalsIgnoreCase("menu")) return;
+                if (!newFab.isEmpty()) fab = newFab;
+                selectedAvion.setFabricant(fab);
+            }
+
+            boolean constructeurExiste = avionService.getAllConstructeurs().contains(fab);
+
+            // --- MODIFICATION DU MODÈLE ---
+            if (constructeurExiste) {
+                List<String> modeles = avionService.getModelesByFabricant(fab);
+                if (!modeles.isEmpty()) {
+                    System.out.println("Modèles existants pour ce constructeur :");
+                    for (int i = 0; i < modeles.size(); i++) {
+                        System.out.println((i + 1) + ". " + modeles.get(i));
+                    }
+                    System.out.print("Sélectionnez un modèle par numéro ou ENTER pour garder : ");
+                    String choixMod = sc.nextLine().trim();
+                    if (choixMod.equalsIgnoreCase("menu")) return;
+                    if (!choixMod.isEmpty()) {
+                        try {
+                            int numMod = Integer.parseInt(choixMod);
+                            if (numMod < 1 || numMod > modeles.size()) {
+                                System.out.println("Numéro incorrect.");
+                                return;
+                            }
+                            selectedAvion.setModele(modeles.get(numMod - 1));
+                        } catch (NumberFormatException e) {
+                            System.out.println("Numéro incorrect.");
+                            return;
+                        }
+                    }
+                } else {
+                    System.out.print("Nouveau modèle : ");
+                    String newMod = sc.nextLine().trim();
+                    if (newMod.equalsIgnoreCase("menu")) return;
+                    selectedAvion.setModele(newMod);
+                }
+            } else {
+                System.out.print("Ce constructeur est nouveau. Saisissez un modèle : ");
+                String newMod = sc.nextLine().trim();
+                if (newMod.equalsIgnoreCase("menu")) return;
+                selectedAvion.setModele(newMod);
+            }
+
+            // --- MODIFICATION DES AUTRES CHAMPS ---
+            System.out.println("Capacité actuelle : " + selectedAvion.getCapacite());
+            System.out.print("Nouvelle capacité (ou ENTER pour garder) : ");
+            String capStr = sc.nextLine().trim();
+            if (capStr.equalsIgnoreCase("menu")) return;
+            if (!capStr.isEmpty()) selectedAvion.setCapacite(Integer.parseInt(capStr));
+
+            System.out.println("Autonomie actuelle : " + selectedAvion.getAutonomie());
+            System.out.print("Nouvelle autonomie (km) (ou ENTER pour garder) : ");
+            String autoStr = sc.nextLine().trim();
+            if (autoStr.equalsIgnoreCase("menu")) return;
+            if (!autoStr.isEmpty()) selectedAvion.setAutonomie(Integer.parseInt(autoStr));
+
+            System.out.println("Nombre de crashs actuel : " + selectedAvion.getCrashs());
+            System.out.print("Nouveau nombre de crashs (ou ENTER pour garder) : ");
+            String crStr = sc.nextLine().trim();
+            if (crStr.equalsIgnoreCase("menu")) return;
+            if (!crStr.isEmpty()) selectedAvion.setCrashs(Integer.parseInt(crStr));
+
+            System.out.println("Année actuelle : " + selectedAvion.getAnneeService());
+            System.out.print("Nouvelle année (ou ENTER pour garder) : ");
+            String yearStr = sc.nextLine().trim();
+            if (yearStr.equalsIgnoreCase("menu")) return;
+            if (!yearStr.isEmpty()) {
+                int year = Integer.parseInt(yearStr);
+                if (year < 1903 || year > 2025) {
+                    System.out.println("Année invalide ! Elle doit être comprise entre 1903 et 2025.");
+                    return;
+                }
+                selectedAvion.setAnneeService(year);
+            }
+
+            // --- MISE À JOUR EN BDD ---
+            String sql = "UPDATE avions SET fabricant = ?, modele = ?, capacite = ?, autonomie = ?, crashs = ?, annee_service = ? WHERE id = ?";
+            try (Connection conn = Database.getConnection();
+                 PreparedStatement ps = conn.prepareStatement(sql)) {
+
+                ps.setString(1, selectedAvion.getFabricant());
+                ps.setString(2, selectedAvion.getModele());
+                ps.setInt(3, selectedAvion.getCapacite());
+                ps.setInt(4, selectedAvion.getAutonomie());
+                ps.setInt(5, selectedAvion.getCrashs());
+                ps.setInt(6, selectedAvion.getAnneeService());
+                ps.setInt(7, selectedAvion.getId());
+
+                ps.executeUpdate();
+            }
+
+            System.out.println("Avion modifié avec succès !");
+        } catch (NumberFormatException e) {
+            System.out.println("Veuillez saisir un nombre valide.");
+        } catch (SQLException e) {
+            System.out.println("Erreur SQL : " + e.getMessage());
+        }
+    }
+
 }
 
 

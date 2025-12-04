@@ -11,9 +11,7 @@ public class CrashService {
 	
 	public List<Crash> getAll() {
         List<Crash> crashs = new ArrayList<>();
-
         String sql = "SELECT * FROM crash";
-
         try (Connection conn = Database.getConnection(); //connection a la bd
              Statement stmt = conn.createStatement(); // permet d'executer les requetes
              ResultSet rs = stmt.executeQuery(sql)) { //permet de "stocker" le resultat de la query
@@ -34,11 +32,9 @@ public class CrashService {
                 );
                 crashs.add(a);
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return crashs;
     }
 	
@@ -75,10 +71,8 @@ public class CrashService {
     public List<Crash> getByModele(String modele) {
         List<Crash> res = new ArrayList<>();
         String sql = "SELECT c.*, a.modele FROM crash c JOIN avions a ON c.avion_id = a.id WHERE a.modele = ? ORDER BY c.date_crash DESC";
-
         try (Connection conn = Database.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-
             ps.setString(1, modele);
             ResultSet rs = ps.executeQuery();
 
@@ -96,14 +90,11 @@ public class CrashService {
                         rs.getString("description")
                 ));
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return res;
     }
-
 
     // Ajouter un crash
     public void addCrash(Crash c) {
@@ -153,48 +144,6 @@ public class CrashService {
         return 0;
     }
 
-   /* // Nombre de crashs pour un modèle
-    public int countByModele(String modele) {
-        String sql = "SELECT crashs as nb FROM avions where modele = ?";
-        try (Connection conn = Database.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, modele);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) return rs.getInt("nb");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return 0;
-    }
-	
-    // Total morts par avion
-    public int totalMortsParAvion(int avionId) {
-        String sql = "SELECT SUM(morts) as s FROM crash WHERE avion_id = ?";
-        try (Connection conn = Database.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, avionId);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) return rs.getInt("s");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return 0;
-    }
-
-    // Total morts par modèle
-    public int totalMortsParModele(String modele) {
-        String sql = "SELECT SUM(c.morts) as s FROM crash c JOIN avions a ON c.avion_id = a.id WHERE a.modele = ?";
-        try (Connection conn = Database.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, modele);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) return rs.getInt("s");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return 0;
-    }
-*/
     // Total morts par fabricant
     public int totalMortsParFabricant(String fabricant) {
         String sql = "SELECT SUM(c.morts) as s FROM crash c JOIN avions a ON c.avion_id = a.id WHERE a.fabricant = ?";

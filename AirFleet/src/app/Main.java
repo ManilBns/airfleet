@@ -9,7 +9,7 @@ import service.AvionService;
 import service.CrashService;
 
 public class Main {
-    // Méthode pour choisir un constructeur parmi ceux existants
+
     public static void main(String[] args) {
 
         AvionService avionService = new AvionService();
@@ -21,10 +21,11 @@ public class Main {
             System.out.println("\n===== BASE DE DONNÉES AVIONS =====");
             System.out.println("1. Afficher tous les avions");
             System.out.println("2. Rechercher un avion par modèle");
-            System.out.println("3. Rechercher par fabricant");
+            System.out.println("3. Rechercher par constructeur");
             System.out.println("4. Ajouter un avion");
-            System.out.println("5. Supprimer un avion");
-            System.out.println("6. Statistiques");
+            System.out.println("5. Modifier un avion");
+            System.out.println("6. Supprimer un avion");
+            System.out.println("7. Statistiques");
             System.out.println("0. Quitter");
             System.out.print("Votre choix : ");
 
@@ -52,10 +53,15 @@ public class Main {
                     Function.addPlane();
                     break;
 
-                case 5: // Supprimer un avion
-                    Function.suppPlane();
+                case 5: // Modifier un avion
+                    Function.modifyPlane();
+                    break;
 
-                case 6: // Statistiques
+                case 6: // Supprimer un avion
+                    Function.suppPlane();
+                    break;
+
+                case 7: // Statistiques
                     int sousChoix;
                     do {
                         System.out.println("\n===== STATISTIQUES =====");
@@ -82,8 +88,8 @@ public class Main {
 
                         switch (sousChoix) {
                             case 1: // Résumé constructeur
-                            	Function.tri();
-                            	break;
+                                Function.tri();
+                                break;
 
                             case 2: // Rechercher crashs par modèle
                                 String modelCrash = AvionService.choisirModele(avionService, sc);
@@ -124,8 +130,12 @@ public class Main {
 
                             case 6: // Supprimer un crash
                                 Function.suppCrash();
+                                break;
+
+                            default:
+                                System.out.println("Choix invalide.");
                         }
-                        
+
                     } while (sousChoix != 0);
                     break;
 

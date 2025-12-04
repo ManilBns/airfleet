@@ -288,6 +288,27 @@ public class AvionService {
             }
         }
     }
+ // Retourne la liste des modèles d'un constructeur donné
+    public List<String> getModelesByFabricant(String fabricant) {
+        List<String> modeles = new ArrayList<>();
+        String sql = "SELECT DISTINCT modele FROM avions WHERE fabricant = ?";
+
+        try (Connection conn = Database.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, fabricant);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                modeles.add(rs.getString("modele"));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return modeles;
+    }
 
 }
 
