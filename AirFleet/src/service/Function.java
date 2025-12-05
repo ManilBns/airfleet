@@ -27,7 +27,6 @@ public class Function {
         System.out.println("\n         Bienvenue sur AirApp !");
         System.out.println("      Votre répertoire d'avions\n");
     }
-
     
     public static void tri() {	
 	    String fabStat = AvionService.choisirConstructeur(avionService, sc);
@@ -557,7 +556,6 @@ public class Function {
                     selectedAvion.setModele(newMod);
                 } */
             }
-
             // --- MODIFICATION DES AUTRES CHAMPS ---
             System.out.println("Capacité actuelle : " + selectedAvion.getCapacite()); //montre la capa actuelle
             System.out.print("Nouvelle capacité (ou ENTER pour garder) : ");
@@ -610,5 +608,3 @@ public class Function {
         }
     }
 }
-
-
