@@ -199,40 +199,55 @@ public class Function {
         System.out.println("Tapez 'menu' à n'importe quelle étape pour revenir au menu principal.\n");
         try {
             // --- CHOIX DU CONSTRUCTEUR ---
-            System.out.println("Voulez-vous choisir un constructeur existant ? (O/N)");
-            String choixFab = sc.nextLine().trim();
-            if (choixFab.equalsIgnoreCase("menu")) return;
-
             String fab;
             boolean constructeurExiste = false;
-            if (choixFab.equalsIgnoreCase("O")) {
-                fab = AvionService.choisirConstructeur(avionService, sc);
-                if (fab == null) return; // retour menu
-                constructeurExiste = true;
-            } else {
-                System.out.print("Saisissez le constructeur : ");
-                fab = sc.nextLine().trim();
-                if (fab.equalsIgnoreCase("menu")) return;
 
-                // Vérifier si vraiment il n'existe pas déjà
-                List<String> existing = avionService.getAllConstructeurs();
-                constructeurExiste = existing.contains(fab);
+            while (true) {
+                System.out.print("Voulez-vous choisir un constructeur existant ? (O/N) : ");
+                String choixFab = sc.nextLine().trim();
+                if (choixFab.equalsIgnoreCase("menu")) return;
+                if (!choixFab.equalsIgnoreCase("O") && !choixFab.equalsIgnoreCase("N")) {
+                    System.out.println("Choisir seulement 'O' ou 'N'");
+                    continue;
+                }
+
+                if (choixFab.equalsIgnoreCase("O")) {
+                    fab = AvionService.choisirConstructeur(avionService, sc);
+                    if (fab == null) return; // retour menu
+                    constructeurExiste = true;
+                } else {
+                    System.out.print("Saisissez le constructeur : ");
+                    fab = sc.nextLine().trim();
+                    if (fab.equalsIgnoreCase("menu")) return;
+
+                    // Vérifier si vraiment il existe déjà
+                    List<String> existing = avionService.getAllConstructeurs();
+                    constructeurExiste = existing.contains(fab);
+                }
+                break;
             }
+
             // --- CHOIX DU MODÈLE ---
             String mod;
             if (constructeurExiste) {
-                System.out.println("Voulez-vous choisir un modèle existant ? (O/N)");
-                String choixModele = sc.nextLine().trim();
-                if (choixModele.equalsIgnoreCase("menu")) return;
+                while (true) {
+                    System.out.print("Voulez-vous choisir un modèle existant ? (O/N) : ");
+                    String choixModele = sc.nextLine().trim();
+                    if (choixModele.equalsIgnoreCase("menu")) return;
+                    if (!choixModele.equalsIgnoreCase("O") && !choixModele.equalsIgnoreCase("N")) {
+                        System.out.println("Choisir seulement 'O' ou 'N'");
+                        continue;
+                    }
 
-                if (choixModele.equalsIgnoreCase("O")) {
-                    // Utilisation de la fonction choisirModelePourConstructeur
-                    mod = AvionService.choisirModelePourConstructeur(avionService, sc, fab);
-                    if (mod == null) return; // retour menu
-                } else {
-                    System.out.print("Saisissez le modèle : ");
-                    mod = sc.nextLine().trim();
-                    if (mod.equalsIgnoreCase("menu")) return;
+                    if (choixModele.equalsIgnoreCase("O")) {
+                        mod = AvionService.choisirModelePourConstructeur(avionService, sc, fab);
+                        if (mod == null) return; // retour menu
+                    } else {
+                        System.out.print("Saisissez le modèle : ");
+                        mod = sc.nextLine().trim();
+                        if (mod.equalsIgnoreCase("menu")) return;
+                    }
+                    break;
                 }
             } else {
                 // Nouveau constructeur → modèle obligatoire
@@ -241,19 +256,23 @@ public class Function {
                 mod = sc.nextLine().trim();
                 if (mod.equalsIgnoreCase("menu")) return;
             }
+
             // --- SAISIE DES AUTRES INFORMATIONS ---
             System.out.print("Capacité : ");
             String capStr = sc.nextLine().trim();
             if (capStr.equalsIgnoreCase("menu")) return;
             int cap = Integer.parseInt(capStr);
+
             System.out.print("Autonomie (km) : ");
             String autoStr = sc.nextLine().trim();
             if (autoStr.equalsIgnoreCase("menu")) return;
             int auto = Integer.parseInt(autoStr);
+
             System.out.print("Nombre de crashs : ");
             String crStr = sc.nextLine().trim();
             if (crStr.equalsIgnoreCase("menu")) return;
             int crr = Integer.parseInt(crStr);
+
             System.out.print("Année d'entrée en service : ");
             String yearStr = sc.nextLine().trim();
             if (yearStr.equalsIgnoreCase("menu")) return;
@@ -262,6 +281,7 @@ public class Function {
                 System.out.println("Année invalide ! Elle doit être comprise entre 1903 et 2025.");
                 return;
             }
+
             // --- AJOUT EN BDD ---
             Avion newAvion = new Avion(0, fab, mod, cap, auto, crr, year);
             avionService.add(newAvion);
@@ -274,9 +294,24 @@ public class Function {
     public static void suppPlane() {
         System.out.println("\n=== SUPPRESSION D'UN AVION ===");
         System.out.println("Tapez 'menu' pour revenir au menu principal.\n");
+
+        // Afficher tous les avions disponibles
+        List<Avion> avions = avionService.getAll();
+        if (avions.isEmpty()) {
+            System.out.println("Aucun avion disponible pour suppression.");
+            return;
+        }
+        System.out.println("Liste des avions :");
+        for (Avion a : avions) {
+            System.out.println(a.getId() + ". " + a.getFabricant() + " " + a.getModele() +
+                               " | Capacité: " + a.getCapacite() + " | Autonomie: " + a.getAutonomie() +
+                               " | Crashs: " + a.getCrashs() + " | Année: " + a.getAnneeService());
+        }
+
         System.out.print("ID de l'avion à supprimer : ");
         String idStr = sc.nextLine().trim();
         if (idStr.equalsIgnoreCase("menu")) return;
+
         int id;
         try {
             id = Integer.parseInt(idStr);
@@ -284,33 +319,58 @@ public class Function {
             System.out.println("Veuillez entrer un nombre valide.");
             return;
         }
-        // Vérification que l'avion existe (optionnel mais conseillé)
-        Avion avion = avionService.getAll().stream() //stream permet de convertir en flux afin de pouvoir utiliser filter
-                         .filter(a -> a.getId() == id)
-                         .findFirst()
-                         .orElse(null); /*Parmi tous les avions récupérés par avionService.getAll(), cherche celui dont l’ID est égal à id.
-        Si tu en trouves un, prends-le ; sinon, mets avion à null */
+
+        Avion avion = avions.stream()
+                            .filter(a -> a.getId() == id)
+                            .findFirst()
+                            .orElse(null);
         if (avion == null) {
             System.out.println("ID introuvable.");
             return;
         }
+
         System.out.println("Vous êtes sur le point de supprimer l'avion : " + avion);
-        System.out.print("Confirmez-vous la suppression ? (O/N) : ");
-        String confirmation = sc.nextLine().trim();
-        if (!confirmation.equalsIgnoreCase("O")) {
-            System.out.println("Suppression annulée.");
-            return;
+
+        // --- CONFIRMATION O/N ---
+        while (true) {
+            System.out.print("Confirmez-vous la suppression ? (O/N) : ");
+            String confirmation = sc.nextLine().trim();
+            if (confirmation.equalsIgnoreCase("menu")) return;
+            if (!confirmation.equalsIgnoreCase("O") && !confirmation.equalsIgnoreCase("N")) {
+                System.out.println("Choisir seulement 'O' ou 'N'");
+                continue;
+            }
+            if (confirmation.equalsIgnoreCase("O")) {
+                boolean ok = avionService.delete(id);
+                System.out.println(ok ? "Suppression réussie !" : "Échec de la suppression.");
+            } else {
+                System.out.println("Suppression annulée.");
+            }
+            break;
         }
-        boolean ok = avionService.delete(id);
-        System.out.println(ok ? "Suppression réussie !" : "Échec de la suppression."); //grace a boolean ok = avionService.delete(id);
     }
 
     public static void suppCrash() {
         System.out.println("\n=== SUPPRESSION D'UN CRASH ===");
         System.out.println("Tapez 'menu' pour revenir au menu principal.\n");
+
+        // Afficher tous les crashs disponibles
+        List<Crash> crashes = crashService.getAll();
+        if (crashes.isEmpty()) {
+            System.out.println("Aucun crash disponible pour suppression.");
+            return;
+        }
+        System.out.println("Liste des crashs :");
+        for (Crash c : crashes) {
+            System.out.println(c.getId() + ". Avion ID: " + c.getAvionId() + " | Modèle: " + c.getModele() +
+                               " | Date: " + c.getDateCrash() + " | Lieu: " + c.getLieu() + 
+                               " | Gravité: " + c.getGravite());
+        }
+
         System.out.print("ID du crash à supprimer : ");
         String crashIdStr = sc.nextLine().trim();
         if (crashIdStr.equalsIgnoreCase("menu")) return;      
+
         int crashId;
         try {
             crashId = Integer.parseInt(crashIdStr);
@@ -318,30 +378,38 @@ public class Function {
             System.out.println("Veuillez entrer un nombre valide.");
             return;
         }
-        // Vérification que le crash existe (optionnel mais conseillé)
-        Crash crash = crashService.getAll().stream()
-                         .filter(c -> c.getId() == crashId)
-                         .findFirst()
-                         .orElse(null);
-        
+
+        Crash crash = crashes.stream()
+                             .filter(c -> c.getId() == crashId)
+                             .findFirst()
+                             .orElse(null);
+
         if (crash == null) {
             System.out.println("ID introuvable.");
             return;
         }
-        // Demander confirmation
-        System.out.println("Vous êtes sur le point de supprimer le crash : " + crash);
-        System.out.print("Confirmez-vous la suppression ? (O/N) : ");
-        String confirmation = sc.nextLine().trim();
-        if (!confirmation.equalsIgnoreCase("O")) {
-            System.out.println("Suppression annulée.");
-            return;
-        }
 
-        boolean supprOk = crashService.deleteCrash(crashId);
-        System.out.println(supprOk ? "Crash supprimé avec succès !" : "Échec de la suppression.");
+        System.out.println("Vous êtes sur le point de supprimer le crash : " + crash);
+
+        // --- CONFIRMATION O/N ---
+        while (true) {
+            System.out.print("Confirmez-vous la suppression ? (O/N) : ");
+            String confirmation = sc.nextLine().trim();
+            if (confirmation.equalsIgnoreCase("menu")) return;
+            if (!confirmation.equalsIgnoreCase("O") && !confirmation.equalsIgnoreCase("N")) {
+                System.out.println("Choisir seulement 'O' ou 'N'");
+                continue;
+            }
+            if (confirmation.equalsIgnoreCase("O")) {
+                boolean supprOk = crashService.deleteCrash(crashId);
+                System.out.println(supprOk ? "Crash supprimé avec succès !" : "Échec de la suppression.");
+            } else {
+                System.out.println("Suppression annulée.");
+            }
+            break;
+        }
     }
 
-    
     public static void afficherAvion() {
     	List<Avion> all = avionService.getAll();
         if (!all.isEmpty()) all.forEach(System.out::println);

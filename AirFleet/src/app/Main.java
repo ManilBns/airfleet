@@ -25,7 +25,7 @@ public class Main {
             System.out.println("4. Ajouter un avion");
             System.out.println("5. Modifier un avion");
             System.out.println("6. Supprimer un avion");
-            System.out.println("7. Statistiques");
+            System.out.println("7. Statistiques & Crashs");
             System.out.println("0. Quitter");
             System.out.print("Votre choix : ");
 
@@ -64,7 +64,7 @@ public class Main {
                 case 7: // Statistiques
                     int sousChoix;
                     do {
-                        System.out.println("\n===== STATISTIQUES =====");
+                        System.out.println("\n===== STATISTIQUES & CRASHS =====");
                         System.out.println("1. Résumé constructeur");
                         System.out.println("2. Rechercher crashs par modèle");
                         System.out.println("3. Rechercher crashs par constructeur");
