@@ -3,14 +3,14 @@ package nativeLib;
 import model.Avion;
 
 public class NativeLib {
-
     static {
-        System.loadLibrary("AirFleetC"); // il charge le dll qui est issue de la compilation du fichier C qui implemente les fonctions
+        System.loadLibrary("AirFleetC"); /* il charge le dll qui est issue
+        de la compilation du fichier C qui implemente les fonctions */
     }
-
     // Fonctions natives
     public native Avion[] trierParCrashs(Avion[] avions);
     public native Avion[] trierParAutonomie(Avion[] avions);
     public native double moyenneCrashs(Avion[] avions);
     public native double moyenneAutonomie(Avion[] avions);
 }
+
