@@ -15,7 +15,7 @@ public class Main {
         AvionService avionService = new AvionService();
         CrashService crashService = new CrashService();
         Scanner sc = new Scanner(System.in);
-
+        Function.afficherBienvenue();
         int choix;
         do {
             System.out.println("\n===== BASE DE DONNÉES AVIONS =====");

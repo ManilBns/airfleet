@@ -17,6 +17,18 @@ public class Function {
     static NativeLib nativeLib = new NativeLib();
     static Scanner sc = new Scanner(System.in);
     
+    
+    public static void afficherBienvenue() {
+        System.out.println("\n");
+        System.out.println("                __|__");
+        System.out.println("         -------(   )-------");
+        System.out.println("   ************* / V \\ *************");
+        System.out.println("                  ***");
+        System.out.println("\n         Bienvenue sur AirApp !");
+        System.out.println("      Votre répertoire d'avions\n");
+    }
+
+    
     public static void tri() {	
 	    String fabStat = AvionService.choisirConstructeur(avionService, sc);
 	    if (fabStat != null) {
@@ -51,68 +63,134 @@ public class Function {
     public static void addCrash() {
         System.out.println("\n=== AJOUT D'UN CRASH ===");
         System.out.println("Tapez 'menu' à n'importe quelle étape pour revenir au menu principal.\n");
-        try {
-        	 /*  ( le fonctionnement est pareil partout : 
-         	sc.nextline.trim permet de lire ce que l'utilisateur a ecris jusqu(a avoir appuyer sur entrée , trim fais  en sorte
-         	d'ignorer les espaces , ensuite iInteger.parseInt s'occupe de transformer le string en int 
-             */
-        	
-            // ID de l'avion
-            System.out.print("ID de l'avion : ");
-            String avionIdStr = sc.nextLine().trim();
-            if (avionIdStr.equalsIgnoreCase("menu")) return;
-            int avionId = Integer.parseInt(avionIdStr);
 
-            // Modèle : choix existant ou saisie libre
-            System.out.println("Voulez-vous choisir un modèle existant ? (O/N)");
-            String choixModele = sc.nextLine().trim();
-            if (choixModele.equalsIgnoreCase("menu")) return;
-            String crashModele;
-            if (choixModele.equalsIgnoreCase("O")) {
-                crashModele = AvionService.choisirModele(avionService, sc);
-                if (crashModele == null) return;
-            } else {
-                System.out.print("Saisissez le modèle : ");
-                crashModele = sc.nextLine().trim();
-                if (crashModele.equalsIgnoreCase("menu")) return;
+        try {
+            List<Avion> avions = avionService.getAll();
+            if (avions.isEmpty()) {
+                System.out.println("Aucun avion disponible. Ajout impossible.");
+                return;
             }
+
+            // Affichage de tous les avions
+            System.out.println("Liste des avions :");
+            for (Avion a : avions) {
+                System.out.println(a.getId() + ". " + a.getFabricant() + " " + a.getModele() +
+                                   " | Capacité: " + a.getCapacite() + " | Autonomie: " + a.getAutonomie() +
+                                   " | Crashs: " + a.getCrashs() + " | Année: " + a.getAnneeService());
+            }
+
+            // Choix de l'avion
+            Avion avion = null;
+            while (avion == null) {
+                System.out.print("ID de l'avion : ");
+                String avionIdStr = sc.nextLine().trim();
+                if (avionIdStr.equalsIgnoreCase("menu")) return;
+                if (avionIdStr.isEmpty()) {
+                    System.out.println("Insérer un numéro !");
+                    continue;
+                }
+                try {
+                    final int idTemp = Integer.parseInt(avionIdStr);
+                    avion = avions.stream().filter(a -> a.getId() == idTemp).findFirst().orElse(null);
+                    if (avion == null) {
+                        System.out.println("Vous essayez d'ajouter un crash sur un avion qui n'existe pas !");
+                    }
+                } catch (NumberFormatException e) {
+                    System.out.println("Veuillez insérer un numéro valide !");
+                }
+            }
+
+            // On récupère automatiquement le modèle de l'avion
+            String crashModele = avion.getModele();
+            System.out.println("Modèle de l'avion sélectionné : " + crashModele);
+
             // Date du crash
-            System.out.print("Date du crash (YYYY-MM-DD) : ");
-            String dateStr = sc.nextLine().trim();
-            if (dateStr.equalsIgnoreCase("menu")) return;
-            Date dateCrash = Date.valueOf(dateStr);
+            Date dateCrash = null;
+            while (dateCrash == null) {
+                System.out.print("Date du crash (YYYY-MM-DD) : ");
+                String dateStr = sc.nextLine().trim();
+                if (dateStr.equalsIgnoreCase("menu")) return;
+                try {
+                    Date tempDate = Date.valueOf(dateStr);
+                    int anneeCrash = tempDate.toLocalDate().getYear();
+                    if (anneeCrash < avion.getAnneeService()) {
+                        System.out.println("L'année du crash doit être >= année de mise en service (" + avion.getAnneeService() + ").");
+                    } else {
+                        dateCrash = tempDate;
+                    }
+                } catch (IllegalArgumentException e) {
+                    System.out.println("Format de date invalide ! Utilisez YYYY-MM-DD.");
+                }
+            }
             // Lieu
             System.out.print("Lieu : ");
             String lieu = sc.nextLine().trim();
             if (lieu.equalsIgnoreCase("menu")) return;
-            // Gravité
-            System.out.print("Gravité : ");
-            String gravite = sc.nextLine().trim();
-            if (gravite.equalsIgnoreCase("menu")) return;
+            // Gravité (choix dynamique)
+            String[] gravites = {"mineur", "sérieux", "catastrophique"};
+            System.out.println("Gravité :");
+            for (int i = 0; i < gravites.length; i++) {
+                System.out.println((i + 1) + ". " + gravites[i]);
+            }
+            String gravite = "";
+            while (true) {
+                System.out.print("Sélectionnez un numéro pour la gravité : ");
+                String choixGravite = sc.nextLine().trim();
+                if (choixGravite.equalsIgnoreCase("menu")) return;
+                try {
+                    int num = Integer.parseInt(choixGravite);
+                    if (num >= 1 && num <= gravites.length) {
+                        gravite = gravites[num - 1];
+                        break;
+                    } else {
+                        System.out.println("Veuillez choisir un numéro valide parmi 1, 2 ou 3.");
+                    }
+                } catch (NumberFormatException e) {
+                    System.out.println("Veuillez entrer un nombre valide pour la gravité !");
+                }
+            }
             // Nombre de morts
-            System.out.print("Nombre de morts : ");
-            String mortsStr = sc.nextLine().trim();
-            if (mortsStr.equalsIgnoreCase("menu")) return;
-            int morts = Integer.parseInt(mortsStr);
+            int morts = -1;
+            while (morts < 0) {
+                System.out.print("Nombre de morts : ");
+                String mortsStr = sc.nextLine().trim();
+                if (mortsStr.equalsIgnoreCase("menu")) return;
+                try {
+                    morts = Integer.parseInt(mortsStr);
+                } catch (NumberFormatException e) {
+                    System.out.println("Insérer un numéro !");
+                }
+            }
+
             // Nombre de blessés
-            System.out.print("Nombre de blessés : ");
-            String blessesStr = sc.nextLine().trim();
-            if (blessesStr.equalsIgnoreCase("menu")) return;
-            int blesses = Integer.parseInt(blessesStr);
+            int blesses = -1;
+            while (blesses < 0) {
+                System.out.print("Nombre de blessés : ");
+                String blessesStr = sc.nextLine().trim();
+                if (blessesStr.equalsIgnoreCase("menu")) return;
+                try {
+                    blesses = Integer.parseInt(blessesStr);
+                } catch (NumberFormatException e) {
+                    System.out.println("Insérer un numéro !");
+                }
+            }
             // Cause
             System.out.print("Cause : ");
             String cause = sc.nextLine().trim();
             if (cause.equalsIgnoreCase("menu")) return;
+
             // Description
             System.out.print("Description : ");
             String desc = sc.nextLine().trim();
             if (desc.equalsIgnoreCase("menu")) return;
+
             // Création du crash
-            Crash newCrash = new Crash(0, avionId, crashModele, dateCrash, lieu, gravite, morts, blesses, cause, desc);
-            crashService.addCrash(newCrash); //le mettre dans la bdd pour la sync 
-            System.out.println(" Crash ajouté avec succès !");
-        } catch (IllegalArgumentException e) {
-            System.out.println(" Format de date invalide ! Utilisez YYYY-MM-DD.");
+            Crash newCrash = new Crash(0, avion.getId(), crashModele, dateCrash, lieu, gravite, morts, blesses, cause, desc);
+            crashService.addCrash(newCrash);
+            System.out.println("Crash ajouté avec succès !");
+
+        } catch (Exception e) {
+            System.out.println("Erreur : " + e.getMessage());
         }
     }
 
@@ -340,14 +418,14 @@ public class Function {
             System.out.print("Sélectionnez un constructeur par numéro / tapez ENTER pour garder / saisir un nouveau : ");
             String choixFab = sc.nextLine().trim();
             if (choixFab.equalsIgnoreCase("menu")) return;
-            if (!choixFab.isEmpty()) {
+            if (!choixFab.isEmpty()) {  //s'il n'a pas appuyer sur entré directement
                 boolean choixValide = false;
                 // Vérifier si c'est un numéro existant
-                try {
+                try { //tester si le choix de l'utilisateur fais partie des choix dynamique proposés
                     int numFab = Integer.parseInt(choixFab);
                     if (numFab >= 1 && numFab <= allConstructeurs.size()) {
                         fab = allConstructeurs.get(numFab - 1); //récuperer le bon constructeur  de la liste de choix dynamique, get(numFab - 1) = s'il tape 1 il aura le premier constructeur allConstructeur.get(0) 
-                        selectedAvion.setFabricant(fab);
+                        selectedAvion.setFabricant(fab); //l'avion prendra ce fabricant
                         choixValide = true;
                     }
                 } catch (NumberFormatException ignored) {}
