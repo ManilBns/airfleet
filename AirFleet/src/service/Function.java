@@ -478,7 +478,8 @@ public class Function {
                 if (!choixValide) {            
                     fab = choixFab; //fab prend la valeur saisie manuellement
                     selectedAvion.setFabricant(fab);
-                    //saisis manuelle du modèle pour le constructeur (car le const était inexsitant auparavant) 
+                    
+                    //saisis manuelle du modèle pour le constructeur (car le constructeur était inexsitant auparavant) 
                     System.out.print("Nouveau modèle pour ce constructeur : ");
                     String newMod = sc.nextLine().trim();
                     if (newMod.equalsIgnoreCase("menu")) {
@@ -493,6 +494,7 @@ public class Function {
             }
             //MODIFICATION DU MODÈLE
             boolean constructeurExiste = false;
+            //pour tous les constructeur vérifier si fab fais partie des constructeurs ( fabricants )
             for (String c : allConstructeurs) {
                 if (c.equalsIgnoreCase(fab)) { // normaliser la casse pour BDD
                     fab = c; 
@@ -501,10 +503,12 @@ public class Function {
                     break;
                 }
             }
+            //fab fais partie des fabricants
             if (constructeurExiste) {
-                List<String> modeles = avionService.getModelesByFabricant(fab);
+                List<String> modeles = avionService.getModelesByFabricant(fab); //lister tous les modèles du fabricant fab
                 if (!modeles.isEmpty()) {
                     System.out.println("Modèles existants pour ce constructeur :");
+                    //afficher la liste de tous les modeles de fab
                     for (int i = 0; i < modeles.size(); i++) {
                         System.out.println((i + 1) + ". " + modeles.get(i));
                     }
@@ -514,6 +518,7 @@ public class Function {
                     if (!choixMod.isEmpty()) {
                         try {
                             int numMod = Integer.parseInt(choixMod);
+                            //si le choix fais partie des numéros du choix dynamique
                             if (numMod >= 1 && numMod <= modeles.size()) {
                                 selectedAvion.setModele(modeles.get(numMod - 1));
                             } else {
@@ -564,7 +569,7 @@ public class Function {
                 }
                 selectedAvion.setAnneeService(year);
             }
-            // --- MISE À JOUR EN BDD ---
+            // MISE À JOUR EN BDD
             String sql = "UPDATE avions SET fabricant = ?, modele = ?, capacite = ?, autonomie = ?, crashs = ?, annee_service = ? WHERE id = ?";
             try (Connection conn = Database.getConnection();
                  PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -586,9 +591,9 @@ public class Function {
     }
     
     public static void rechercheCrashParModele() {
-    	String modelCrash = AvionService.choisirModele(avionService, sc);
+    	String modelCrash = AvionService.choisirModele(avionService, sc); //choisir le modele d'avion
         if (modelCrash != null) {
-            List<Crash> crashess = crashService.getByModele(modelCrash);
+            List<Crash> crashess = crashService.getByModele(modelCrash); //liste de tous les crash du modeles "modelCrash"
             if (!crashess.isEmpty()) {
                 for (Crash c : crashess) {
                     System.out.println("\n" + c + "\n");
@@ -598,9 +603,9 @@ public class Function {
     }
     
     public static void rechercheCrashParConstructeur() {
-    	  String fabCrash = AvionService.choisirConstructeur(avionService, sc);
+    	  String fabCrash = AvionService.choisirConstructeur(avionService, sc); //choisir le fabricant
           if (fabCrash != null) {
-              List<Crash> crashes = crashService.getByFabricant(fabCrash);
+              List<Crash> crashes = crashService.getByFabricant(fabCrash); //liste de tous les crashs du fabricant'fabCrash'
               if (!crashes.isEmpty()) {
                   for (Crash c : crashes) {
                       System.out.println("\n" + c + "\n");

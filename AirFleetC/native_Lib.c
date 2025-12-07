@@ -26,7 +26,7 @@ Avion getAvion(JNIEnv *env, jobject jAvion) { //JNIEnv *env est la syntaxe JNI o
     a.id = (*env)->GetIntField(env, jAvion, fid); //Dans l’objet Java jAvion, lis la valeur du champ entier identifié par fid
 
     //recuperation d'un champ string (fabricant)
-    fid = (*env)->GetFieldID(env, cls, "fabricant", "Ljava/lang/String;"); //Dans la classe cls, donne-moi l’ID du champ String appelé fabricant
+    fid = (*env)->GetFieldID(env, cls, "fabricant", "Ljava/lang/String;"); //Dans la classe cls, donne-moi l’ID du champ fabricant de type String
     jstring str = (jstring)(*env)->GetObjectField(env, jAvion, fid); //Dans l’objet Java jAvion, lis la valeur du champ string identifié par fid
     const char *cstr = (*env)->GetStringUTFChars(env, str, NULL); //Convertit le String Java → chaîne C
     snprintf(a.fabricant, sizeof(a.fabricant), "%s", cstr); //ex : a.fabricant = "Airbus" , snprintf protège contre le dépassement de mémoire
@@ -98,6 +98,7 @@ JNIEXPORT jobjectArray JNICALL Java_nativeLib_NativeLib_trierParAutonomie
   (JNIEnv *env, jobject obj, jobjectArray jAvions) {
     jsize len = (*env)->GetArrayLength(env, jAvions);
     Avion *avions = malloc(len * sizeof(Avion));
+    //convertir les avions java en c
     for(int i = 0; i < len; i++) {
         jobject jAvion = (*env)->GetObjectArrayElement(env, jAvions, i);
         avions[i] = getAvion(env, jAvion);
@@ -113,19 +114,19 @@ JNIEXPORT jobjectArray JNICALL Java_nativeLib_NativeLib_trierParAutonomie
             }
         }
     }
+
+    // Création du tableau Java pour retourner
     jclass clsAvion = (*env)->FindClass(env, "model/Avion");
     jobjectArray result = (*env)->NewObjectArray(env, len, clsAvion, NULL);
+    //creation des objet java triés
     for(int i = 0; i < len; i++) {
         jobject jAvion = createAvion(env, clsAvion, avions[i]);
         (*env)->SetObjectArrayElement(env, result, i, jAvion);
     }
-
     free(avions);
     return result;
 }
-
 // ----------------- MOYENNE CRASHS -----------------
-
 JNIEXPORT jdouble JNICALL Java_nativeLib_NativeLib_moyenneCrashs
   (JNIEnv *env, jobject obj, jobjectArray jAvions) {
 
@@ -147,12 +148,12 @@ JNIEXPORT jdouble JNICALL Java_nativeLib_NativeLib_moyenneCrashs
 JNIEXPORT jdouble JNICALL Java_nativeLib_NativeLib_moyenneAutonomie
   (JNIEnv *env, jobject obj, jobjectArray jAvions) {
 
-    jsize len = (*env)->GetArrayLength(env, jAvions);
+    jsize len = (*env)->GetArrayLength(env, jAvions); //la longueur du tableau java
     if(len == 0) return 0;
     double sum = 0;
     for(int i = 0; i < len; i++) {
-        jobject jAvion = (*env)->GetObjectArrayElement(env, jAvions, i);
-        Avion a = getAvion(env, jAvion);
+        jobject jAvion = (*env)->GetObjectArrayElement(env, jAvions, i); //récupère l’objet Avion à l’index i
+        Avion a = getAvion(env, jAvion); //convertit l’objet Java en struct C
         sum += a.autonomie;
     }
     double result = sum / len;
