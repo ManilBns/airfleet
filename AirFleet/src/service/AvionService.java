@@ -7,13 +7,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 public class AvionService {
+	
     public List<Avion> getAll() {
         List<Avion> avions = new ArrayList<>();
         String sql = "SELECT * FROM avions";
         try (Connection conn = Database.getConnection(); //connection a la bd
              Statement stmt = conn.createStatement(); // permet d'executer les requetes
              ResultSet rs = stmt.executeQuery(sql)) { //permet de "stocker" le resultat de la query
-            while (rs.next()) {
+            while (rs.next()) { //rs.next passe a l'autre ligne et renvoi un booleen true si la ligne existe false sinon
                 Avion a = new Avion(
                         rs.getInt("id"),
                         rs.getString("fabricant"),
@@ -31,13 +32,11 @@ public class AvionService {
         return avions;
     }
 
-    // -----------------------------
     // Recherche par modèle
-    // -----------------------------
     public Avion searchByModel(String modele) {
         String sql = "SELECT * FROM avions WHERE modele = ?";
         try (Connection conn = Database.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+             PreparedStatement ps = conn.prepareStatement(sql)) { //Prépare la requête en remplaçant les ? plus tard
             ps.setString(1, modele);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
@@ -57,19 +56,14 @@ public class AvionService {
         return null;
     }
     
-    // -----------------------------
     // Recherche par fabricant
-    // -----------------------------
     public List<Avion> searchByFabricant(String fabricant) {
         List<Avion> avions = new ArrayList<>();
         String sql = "SELECT * FROM avions WHERE fabricant = ?";
-
         try (Connection conn = Database.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-
             ps.setString(1, fabricant);
             ResultSet rs = ps.executeQuery();
-
             while (rs.next()) {  // <-- boucle pour tous les avions
                 Avion a = new Avion(
                         rs.getInt("id"),
@@ -82,54 +76,40 @@ public class AvionService {
                 );
                 avions.add(a);
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return avions; // retourne la liste complète
     }
-    // -----------------------------
+
     // Ajout d'un avion
-    // -----------------------------
     public void add(Avion avion) {
         String sql = "INSERT INTO avions (fabricant, modele, capacite, autonomie, crashs, annee_service) VALUES (?, ?, ?, ?, ?, ?)";
-
         try (Connection conn = Database.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-
             ps.setString(1, avion.getFabricant());
             ps.setString(2, avion.getModele());
             ps.setInt(3, avion.getCapacite());
             ps.setInt(4, avion.getAutonomie());
             ps.setInt(5, avion.getCrashs());
             ps.setInt(6, avion.getAnneeService());
-
             ps.executeUpdate();
-
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    // -----------------------------
     // Suppression d'un avion
-    // -----------------------------
     public boolean delete(int id) {
         String sql = "DELETE FROM avions WHERE id = ?";
-
         try (Connection conn = Database.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setInt(1, id);
-
-            return ps.executeUpdate() > 0;
-
+            ps.setInt(1, id); //remplace le ? par l'id entré
+            return ps.executeUpdate() > 0; //executeUpdate execute delete elle renvoi true si au moins une ligne a ete supp sinon false
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        return false;
+        return false; //suppression n'a pas réuessie
     }
     
     //avoir tous les constructeurs
@@ -148,7 +128,7 @@ public class AvionService {
         return constructeurs;
     }
     
-    //avoir tous les constructeurs
+    //avoir tous les modeles
     public List<String> getAllModele() {
         List<String> modele = new ArrayList<>();
         String sql = "SELECT DISTINCT modele FROM avions";
@@ -171,13 +151,12 @@ public class AvionService {
             System.out.println("Aucun constructeur disponible.");
             return null;
         }
-
+        //affichage des constructeur existants
         System.out.println("Sélectionnez un constructeur :");
         for (int i = 0; i < constructeurs.size(); i++) {
             System.out.println((i + 1) + ". " + constructeurs.get(i));
         }
         System.out.println("0. Retour au menu principal");
-
         int choix = -1;
         do {
             System.out.print("Votre choix (numéro) : ");
@@ -186,13 +165,12 @@ public class AvionService {
                 choix = Integer.parseInt(line);
             } catch (NumberFormatException e) {
                 choix = -1;
+                System.out.println("Choisir un des numéros ci-dessus ! ");
             }
-
             if (choix == 0) return null; // retourne au menu principal
 
         } while (choix < 1 || choix > constructeurs.size());
-
-        return constructeurs.get(choix - 1);
+        return constructeurs.get(choix - 1); //retour  du modele correspondant -1 car la liste affiché commence par 1 mais réellement elle commence a 0
     }
 
     // Méthode pour choisir un modèle parmi ceux existants
@@ -202,13 +180,11 @@ public class AvionService {
             System.out.println("Aucun modèle disponible.");
             return null;
         }
-
         System.out.println("Sélectionnez un modèle :");
         for (int i = 0; i < modeles.size(); i++) {
             System.out.println((i + 1) + ". " + modeles.get(i));
         }
         System.out.println("0. Retour au menu principal");
-
         int choix = -1;
         do {
             System.out.print("Votre choix (numéro) : ");
@@ -217,55 +193,51 @@ public class AvionService {
                 choix = Integer.parseInt(line);
             } catch (NumberFormatException e) {
                 choix = -1;
+                System.out.println("Choisir un des numéros ci-dessus ! ");
             }
-
             if (choix == 0) return null; // retourne au menu principal
-
         } while (choix < 1 || choix > modeles.size());
 
         return modeles.get(choix - 1);
     }
     
- // selectionner les modeles en fonction du fabricant et les afficher
-    public static String choisirModelePourConstructeur(AvionService avionService, Scanner sc, String fabricant) {
+    // fonction utilitaire : Retourne la liste des modèles d'un constructeur donné
+    public List<String> getModelesByFabricant(String fabricant) {
         List<String> modeles = new ArrayList<>();
         String sql = "SELECT DISTINCT modele FROM avions WHERE fabricant = ?";
-
         try (Connection conn = Database.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, fabricant);
-            ResultSet rs = stmt.executeQuery();
-
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, fabricant);
+            ResultSet rs = ps.executeQuery();
             while (rs.next()) {
-                modeles.add(rs.getString("modele"));
+                modeles.add(rs.getString("modele")); //on recup la valeur de la colonne modele, et on ajoute ce modele dans la liste modeles
             }
-
         } catch (SQLException e) {
-            System.out.println("Erreur SQL : " + e.getMessage());
-            return null;
+            e.printStackTrace();
         }
-
+        return modeles;
+    }
+    
+ // selectionner les modeles en fonction du fabricant et les afficher
+    public static String choisirModelePourConstructeur(AvionService avionService, Scanner sc, String fabricant) {
+        List<String> modeles = avionService.getModelesByFabricant(fabricant);
         if (modeles.isEmpty()) {
             System.out.println("Aucun modèle existant pour " + fabricant);
             return null;
         }
-
         // Affichage des modèles existants pour le constructeur
         System.out.println("Modèles existants pour " + fabricant + " :");
         for (int i = 0; i < modeles.size(); i++) {
             System.out.println((i + 1) + ". " + modeles.get(i));
         }
         System.out.println("0. Retour au menu principal");
-
+        // Selection (Boucle de saisie utilisateur, la boucle est infinie tant que la selection est invalide)
         while (true) {
             System.out.print("Votre choix : ");
             String input = sc.nextLine().trim();
-
             if (input.equalsIgnoreCase("menu") || input.equals("0")) {
                 return null; // Retour menu
             }
-
             try {
                 int choix = Integer.parseInt(input);
                 if (choix >= 1 && choix <= modeles.size()) {
@@ -277,30 +249,5 @@ public class AvionService {
                 System.out.println("Numéro incorrect. Réessayez.");
             }
         }
-    }
- // Retourne la liste des modèles d'un constructeur donné
-    public List<String> getModelesByFabricant(String fabricant) {
-        List<String> modeles = new ArrayList<>();
-        String sql = "SELECT DISTINCT modele FROM avions WHERE fabricant = ?";
-
-        try (Connection conn = Database.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setString(1, fabricant);
-            ResultSet rs = ps.executeQuery();
-
-            while (rs.next()) {
-                modeles.add(rs.getString("modele"));
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return modeles;
-    }
-
+    }    
 }
-
-
-
